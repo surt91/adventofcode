@@ -2,7 +2,7 @@ use std::fs;
 use itermore::IterMore;
 
 pub fn run() {
-    let input = fs::read_to_string("data/day01a.dat").unwrap();
+    let input = fs::read_to_string("data/day01a.dat").expect("input file does not exist");
     let data = parse(&input);
     println!("{}", sonar(&data));
     println!("{}", three(&data));
@@ -25,7 +25,7 @@ fn three(data: &[i32]) -> i32 {
 }
 
 fn parse(input: &str) -> Vec<i32> {
-    let data = input.split("\n")
+    let data = input.split('\n')
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
         .map(|line|
@@ -34,7 +34,7 @@ fn parse(input: &str) -> Vec<i32> {
         )
         .collect();
 
-    return data;
+    data
 }
 
 #[cfg(test)]
@@ -43,7 +43,7 @@ mod tests {
 
     #[test]
     fn example1() {
-        let input = r#"
+        let input = r"
             199
             200
             208
@@ -54,8 +54,8 @@ mod tests {
             269
             260
             263
-        "#;
-        let data = parse(&input);
+        ";
+        let data = parse(input);
         assert_eq!(sonar(&data), 7);
         assert_eq!(three(&data), 5);
     }

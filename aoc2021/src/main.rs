@@ -12,6 +12,7 @@ fn main() {
     match args[1].parse::<i32>() {
         Ok(1) => day01::run(),
         Ok(2) => day02::run(),
+        Ok(3) => day03::run(),
         Err(e) => println!("Invalid Argument: {}.", e),
         _ => println!("Is not solved yet!")
     }

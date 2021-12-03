@@ -1,20 +1,16 @@
-use std::fs;
+use super::utils::read_lines;
 
 pub fn run() {
-    let input = fs::read_to_string("data/day02a.dat").expect("input file does not exist");
-    println!("{}", navigate(&input));
-    println!("{}", aim(&input));
+    let actions = read_lines("data/day02a.dat");
+
+    println!("{}", navigate(&actions));
+    println!("{}", aim(&actions));
 }
 
-fn navigate(input: &str) -> i64 {
-    let actions = input.split('\n')
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty());
-
+fn navigate(actions: &[String]) -> i64 {
     let mut depth = 0i64;
     let mut position = 0i64;
     for action in actions {
-
         if let [direction, magnitude_string] = action.split(' ').collect::<Vec<&str>>()[..] {
             let magnitude = magnitude_string.parse::<i64>().expect("invalid input");
             match direction {
@@ -29,11 +25,7 @@ fn navigate(input: &str) -> i64 {
     depth * position
 }
 
-fn aim(input: &str) -> i64 {
-    let actions = input.split('\n')
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty());
-
+fn aim(actions: &[String]) -> i64 {
     let mut aim = 0i64;
     let mut depth = 0i64;
     let mut position = 0i64;
@@ -59,6 +51,8 @@ fn aim(input: &str) -> i64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::split_lines;
+
     use super::*;
 
     #[test]
@@ -71,7 +65,10 @@ mod tests {
             down 8
             forward 2
         ";
-        assert_eq!(navigate(input), 150);
-        assert_eq!(aim(input), 900);
+
+        let actions = split_lines(input);
+
+        assert_eq!(navigate(&actions), 150);
+        assert_eq!(aim(&actions), 900);
     }
 }

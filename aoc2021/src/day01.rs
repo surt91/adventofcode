@@ -1,9 +1,11 @@
-use std::fs;
 use itermore::IterMore;
 
+use super::utils::read_lines;
+
 pub fn run() {
-    let input = fs::read_to_string("data/day01a.dat").expect("input file does not exist");
-    let data = parse(&input);
+    let lines = read_lines("data/day01a.dat");
+    let data = parse(&lines);
+
     println!("{}", sonar(&data));
     println!("{}", three(&data));
 }
@@ -24,21 +26,19 @@ fn three(data: &[i32]) -> i32 {
         .count() as i32
 }
 
-fn parse(input: &str) -> Vec<i32> {
-    let data = input.split('\n')
-        .map(|line| line.trim())
-        .filter(|line| !line.is_empty())
+fn parse(lines: &[String]) -> Vec<i32> {
+    lines.iter()
         .map(|line|
             line.parse::<i32>()
                 .expect("invalid input data!")
         )
-        .collect();
-
-    data
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::split_lines;
+
     use super::*;
 
     #[test]
@@ -55,7 +55,10 @@ mod tests {
             260
             263
         ";
-        let data = parse(input);
+
+        let lines = split_lines(input);
+        let data = parse(&lines);
+
         assert_eq!(sonar(&data), 7);
         assert_eq!(three(&data), 5);
     }

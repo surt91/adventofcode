@@ -1,6 +1,6 @@
-use std::{collections::HashMap, str::FromStr,  error::Error, fmt, ops::Add, cmp::max};
+use std::{collections::HashMap, str::FromStr, fmt, ops::Add, cmp::max};
 
-use super::utils::read_lines;
+use crate::utils::{read_lines, InvalidInput};
 
 pub fn run() {
     let lines = read_lines("data/day05a.dat");
@@ -76,15 +76,6 @@ impl fmt::Display for Point {
         write!(f, "{},{}", self.x, self.y)
     }
 }
-
-#[derive(Debug, Clone)]
-struct InvalidInput;
-impl fmt::Display for InvalidInput {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid input")
-    }
-}
-impl Error for InvalidInput {}
 
 impl FromStr for Point {
     type Err = InvalidInput;

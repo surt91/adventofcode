@@ -1,10 +1,12 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, str::FromStr, num::ParseIntError};
 
 use itertools::Itertools;
 
+use crate::utils::InvalidInput;
+
 pub fn run() {
     let input = fs::read_to_string("data/day04a.dat").expect("input file does not exist");
-    let (order, boards) = parse(&input);
+    let (order, boards) = parse(&input).expect("invalid input");
 
     println!("{}", bingo_first(&order, boards.clone()));
     println!("{}", bingo_last(&order, boards));
@@ -20,33 +22,6 @@ struct Board {
 }
 
 impl Board {
-    fn from_string(input: &str) -> Board {
-        let lines: Vec<Vec<isize>> = input.trim().split('\n')
-            .map(|line| line.split_whitespace()
-                .map(|i| i.parse::<isize>().expect("invalid input"))
-                .collect())
-            .collect();
-
-        let width = lines[0].len();
-        let height = lines.len();
-        // asssert that the board is not jagged
-        assert!(lines.iter().all(|line| line.len() == width));
-
-        let positions = (0..width).cartesian_product(0..height)
-            .map(|(x, y)| (lines[x][y], (x, y)))
-            .collect();
-
-        let marks = vec![vec![false; height]; width];
-
-        Board {
-            width,
-            height,
-            positions,
-            marks,
-            finished: false
-        }
-    }
-
     fn mark(&mut self, number: isize) {
         if let Some(&(x, y)) = self.positions.get(&number) {
             self.marks[x][y] = true;
@@ -83,6 +58,39 @@ impl Board {
     }
 }
 
+impl FromStr for Board {
+    type Err = ParseIntError;
+
+    fn from_str(input: &str) -> Result<Self, ParseIntError> {
+        let lines: Vec<Vec<isize>> = input.trim().split('\n')
+            .map(|line| line.split_whitespace()
+                .map(|i| i.parse())
+                .collect::<Result<_, _>>()
+            ).collect::<Result<_, _>>()?;
+
+        let width = lines[0].len();
+        let height = lines.len();
+        // assert that the board is not jagged
+        assert!(lines.iter().all(|line| line.len() == width));
+
+        let positions = (0..width).cartesian_product(0..height)
+            .map(|(x, y)| (lines[x][y], (x, y)))
+            .collect();
+
+        let marks = vec![vec![false; height]; width];
+
+        Ok(
+            Board {
+                width,
+                height,
+                positions,
+                marks,
+                finished: false
+            }
+        )
+    }
+}
+
 fn bingo_first(order: &[isize], mut boards: Vec<Board>) -> isize {
     for &i in order {
         for board in &mut boards {
@@ -112,25 +120,26 @@ fn bingo_last(order: &[isize], mut boards: Vec<Board>) -> isize {
     last_score
 }
 
-fn parse(input: &str) -> (Vec<isize>, Vec<Board>) {
+fn parse(input: &str) -> Result<(Vec<isize>, Vec<Board>), InvalidInput> {
     let mut blocks = input.split("\n\n");
 
-    let order = blocks.next().expect("invalid input")
+    let order = blocks.next()
+        .ok_or(InvalidInput)?
         .split(',')
-        .map(|s| s.parse::<isize>().expect("invalid input"))
-        .collect();
+        .map(|s| s.parse().map_err(|_| InvalidInput))
+        .collect::<Result<_, _>>()?;
 
     let mut boards = Vec::new();
 
     for block in blocks {
         if block.trim().is_empty() {
-            panic!("invalid input")
+            return Err(InvalidInput);
         }
-        let board = Board::from_string(block);
+        let board = block.parse().map_err(|_| InvalidInput)?;
         boards.push(board);
     }
 
-    (order, boards)
+    Ok((order, boards))
 }
 
 #[cfg(test)]
@@ -160,7 +169,7 @@ mod tests {
              2  0 12  3  7
         ";
 
-        let (order, boards) = parse(input);
+        let (order, boards) = parse(input).expect("invalid input");
 
         assert_eq!(bingo_first(&order, boards.clone()), 4512);
         assert_eq!(bingo_last(&order, boards), 1924);

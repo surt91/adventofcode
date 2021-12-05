@@ -75,14 +75,13 @@ fn criteria(lines: &[String], most: bool) -> Vec<u8> {
         let most_common = binary(&candidates, 1)[idx];
         let least_common = if most_common == 1 { 0 } else { 1 };
 
-        candidates = candidates.into_iter()
-            .filter(|candidate|
-                if most {
-                    candidate[idx] == most_common
-                } else {
-                    candidate[idx] == least_common
-                }
-            ).collect();
+        candidates.retain(|candidate|
+            if most {
+                candidate[idx] == most_common
+            } else {
+                candidate[idx] == least_common
+            }
+        );
 
         idx += 1;
     }

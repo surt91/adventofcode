@@ -2,12 +2,14 @@ use itermore::IterMore;
 
 use super::utils::read_lines;
 
-pub fn run() {
+pub fn run() -> (i32, i32) {
     let lines = read_lines("data/day01a.dat");
     let data = parse(&lines);
 
-    println!("{}", sonar(&data));
-    println!("{}", three(&data));
+    (
+        sonar(&data),
+        three(&data)
+    )
 }
 
 fn sonar(data: &[i32]) -> i32 {
@@ -42,7 +44,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example1() {
+    fn example() {
         let input = r"
             199
             200

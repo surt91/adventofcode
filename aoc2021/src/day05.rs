@@ -2,12 +2,14 @@ use std::{collections::HashMap, str::FromStr, fmt, ops::Add, cmp::max};
 
 use crate::utils::{read_lines, InvalidInput};
 
-pub fn run() {
+pub fn run() -> (usize, usize) {
     let lines = read_lines("data/day05a.dat");
     let data = parse(&lines);
 
-    println!("{}", count(&data, 2, false));
-    println!("{}", count(&data, 2, true));
+    (
+        count(&data, 2, false),
+        count(&data, 2, true)
+    )
 }
 
 fn count(data: &[(Point, Point)], threshold: usize, diagonals: bool) -> usize {
@@ -119,7 +121,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example1() {
+    fn example() {
         let input = r"
             0,9 -> 5,9
             8,0 -> 0,8

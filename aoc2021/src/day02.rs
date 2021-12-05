@@ -1,10 +1,12 @@
 use super::utils::read_lines;
 
-pub fn run() {
+pub fn run() -> (i64, i64) {
     let actions = read_lines("data/day02a.dat");
 
-    println!("{}", navigate(&actions));
-    println!("{}", aim(&actions));
+    (
+        navigate(&actions),
+        aim(&actions)
+    )
 }
 
 fn navigate(actions: &[String]) -> i64 {
@@ -56,7 +58,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example1() {
+    fn example() {
         let input = r"
             forward 5
             down 5

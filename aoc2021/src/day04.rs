@@ -4,12 +4,14 @@ use itertools::Itertools;
 
 use crate::utils::InvalidInput;
 
-pub fn run() {
+pub fn run() -> (isize, isize) {
     let input = fs::read_to_string("data/day04a.dat").expect("input file does not exist");
     let (order, boards) = parse(&input).expect("invalid input");
 
-    println!("{}", bingo_first(&order, boards.clone()));
-    println!("{}", bingo_last(&order, boards));
+    (
+        bingo_first(&order, boards.clone()),
+        bingo_last(&order, boards)
+    )
 }
 
 #[derive(Clone)]
@@ -147,7 +149,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example1() {
+    fn example() {
         let input = r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
             22 13 17 11  0

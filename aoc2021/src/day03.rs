@@ -2,11 +2,13 @@ use std::cmp::Ordering;
 
 use super::utils::read_lines;
 
-pub fn run() {
+pub fn run() -> (i64, i64) {
     let diagnostics = read_lines("data/day03a.dat");
 
-    println!("{}", power_consumption(&diagnostics));
-    println!("{}", life_support(&diagnostics));
+    (
+        power_consumption(&diagnostics),
+        life_support(&diagnostics)
+    )
 }
 
 fn power_consumption(diagnostics: &[String]) -> i64 {
@@ -107,7 +109,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example1() {
+    fn example() {
         let input = r"
             00100
             11110

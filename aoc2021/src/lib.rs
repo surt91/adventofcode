@@ -1,4 +1,5 @@
 mod utils;
+mod utils_test;
 
 pub mod day01;
 pub mod day02;

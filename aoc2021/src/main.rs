@@ -16,14 +16,16 @@ fn main() {
         println!("{}", b);
     }
 
-    match args[1].parse::<i32>() {
-        Ok(1) => show(day01::run()),
-        Ok(2) => show(day02::run()),
-        Ok(3) => show(day03::run()),
-        Ok(4) => show(day04::run()),
-        Ok(5) => show(day05::run()),
-        Err(e) => println!("Invalid Argument: {}.", e),
-        _ => println!("Is not solved yet!")
+    for arg in &args[1..] {
+        match arg.parse::<i32>() {
+            Ok(1) => show(day01::run()),
+            Ok(2) => show(day02::run()),
+            Ok(3) => show(day03::run()),
+            Ok(4) => show(day04::run()),
+            Ok(5) => show(day05::run()),
+            Err(e) => println!("Invalid Argument: {}.", e),
+            _ => println!("Is not solved yet!")
+        }
     }
 }
 

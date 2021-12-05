@@ -1,0 +1,151 @@
+use std::{collections::HashMap, str::FromStr,  error::Error, fmt, ops::Add, cmp::max};
+
+use super::utils::read_lines;
+
+pub fn run() {
+    let lines = read_lines("data/day05a.dat");
+    let data = parse(&lines);
+
+    println!("{}", count(&data, 2, false));
+    println!("{}", count(&data, 2, true));
+}
+
+fn count(data: &[(Point, Point)], threshold: usize, diagonals: bool) -> usize {
+    let mut map: HashMap<Point, usize> = HashMap::new();
+
+    for (start, end) in data {
+        let (dx, dy) = ((end.x - start.x).abs(), (end.y - start.y).abs());
+
+        // skip diagonals
+        if !diagonals && dx == dy {
+            continue;
+        }
+
+        let mut x = start.x;
+        let mut y = start.y;
+        for _ in 0..=max(dx, dy) {
+            let p = Point::new(x, y);
+
+            *map.entry(p).or_insert(0) += 1;
+
+            x += (end.x - start.x).signum();
+            y += (end.y - start.y).signum();
+        }
+    }
+
+    map.values()
+        .filter(|&&i| i >= threshold)
+        .count()
+}
+
+fn _print_map(map: &HashMap<Point, usize>) {
+    for j in 0..10 {
+        for i in 0..10 {
+            let c = map.get(&Point::new(i, j)).or(Some(&0)).unwrap();
+            print!("{} ", c);
+        }
+        println!();
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+struct Point {
+    x: isize,
+    y: isize
+}
+
+impl Point {
+    fn new(x: isize, y: isize) -> Self {
+        Point {x, y}
+    }
+}
+
+impl Add for &Point {
+    type Output = Point;
+
+    fn add(self, other: Self) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{}", self.x, self.y)
+    }
+}
+
+#[derive(Debug, Clone)]
+struct InvalidInput;
+impl fmt::Display for InvalidInput {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "invalid input")
+    }
+}
+impl Error for InvalidInput {}
+
+impl FromStr for Point {
+    type Err = InvalidInput;
+
+    fn from_str(input: &str) -> Result<Self, InvalidInput> {
+        let mut p = input.split(',');
+
+        let x = p.next().ok_or(InvalidInput)?
+            .parse()
+            .map_err(|_| InvalidInput)?;
+        let y = p.next().ok_or(InvalidInput)?
+            .parse()
+            .map_err(|_| InvalidInput)?;
+
+        Ok(Point {x, y})
+    }
+}
+
+fn parse(lines: &[String]) -> Vec<(Point, Point)> {
+    fn parse_line(line: &str) -> Result<(Point, Point), InvalidInput> {
+        let mut points = line.split(" -> ");
+
+        let p1 = points.next().ok_or(InvalidInput)?.parse()?;
+        let p2 = points.next().ok_or(InvalidInput)?.parse()?;
+
+        Ok((p1, p2))
+    }
+
+    lines.iter()
+        .map(|line|
+            parse_line(line)
+        )
+        .collect::<Result<_, _>>()
+        .expect("invalid input")
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::split_lines;
+
+    use super::*;
+
+    #[test]
+    fn example1() {
+        let input = r"
+            0,9 -> 5,9
+            8,0 -> 0,8
+            9,4 -> 3,4
+            2,2 -> 2,1
+            7,0 -> 7,4
+            6,4 -> 2,0
+            0,9 -> 2,9
+            3,4 -> 1,4
+            0,0 -> 8,8
+            5,5 -> 8,2
+        ";
+
+        let lines = split_lines(input);
+        let data = parse(&lines);
+
+        assert_eq!(count(&data, 2, false), 5);
+        assert_eq!(count(&data, 2, true), 12);
+    }
+}

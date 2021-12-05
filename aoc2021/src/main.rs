@@ -14,6 +14,7 @@ fn main() {
         Ok(2) => day02::run(),
         Ok(3) => day03::run(),
         Ok(4) => day04::run(),
+        Ok(5) => day05::run(),
         Err(e) => println!("Invalid Argument: {}.", e),
         _ => println!("Is not solved yet!")
     }

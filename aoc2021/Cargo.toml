@@ -9,3 +9,10 @@ edition = "2018"
 itermore = "0.1.0"
 itertools = "0.10.1"
 thiserror = "1.0.30"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "all_days"
+harness = false

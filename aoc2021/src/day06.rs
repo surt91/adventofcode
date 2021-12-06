@@ -1,8 +1,8 @@
-use crate::utils::{read_lines};
+use crate::utils::{AdventError, read_lines};
 
 pub fn run() -> (usize, usize) {
     let lines = read_lines("data/day06a.dat");
-    let data = parse(&lines[0]);
+    let data = parse(&lines[0]).expect("invalid input");
 
     (
         num_fish(&data, 80),
@@ -25,7 +25,7 @@ struct LanternfishSchool {
 
 impl LanternfishSchool {
     fn new(individuals: &[u8]) -> Self {
-        let mut internal_timers = vec![0usize; 9];
+        let mut internal_timers = vec![0; 9];
 
         for &i in individuals {
             internal_timers[i as usize] += 1;
@@ -49,11 +49,13 @@ impl LanternfishSchool {
     }
 }
 
-fn parse(input: &str) -> Vec<u8> {
+fn parse(input: &str) -> Result<Vec<u8>, AdventError> {
     input.split(',')
-        .map(|i| i.parse())
-        .collect::<Result<_, _>>()
-        .expect("invalid input")
+        .map(|i|
+            i.parse()
+                .map_err(AdventError::Parser)
+        )
+        .collect()
 }
 
 #[cfg(test)]
@@ -64,7 +66,7 @@ mod tests {
     fn example() {
         let input = r"3,4,3,1,2";
 
-        let data = parse(input);
+        let data = parse(input).expect("invalid input");
 
         assert_eq!(num_fish(&data, 18), 26);
         assert_eq!(num_fish(&data, 80), 5934);

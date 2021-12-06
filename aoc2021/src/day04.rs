@@ -1,8 +1,8 @@
-use std::{collections::HashMap, fs, str::FromStr, num::ParseIntError};
+use std::{collections::HashMap, fs, str::FromStr};
 
 use itertools::Itertools;
 
-use crate::utils::InvalidInput;
+use crate::utils::AdventError;
 
 pub fn run() -> (isize, isize) {
     let input = fs::read_to_string("data/day04a.dat").expect("input file does not exist");
@@ -61,9 +61,9 @@ impl Board {
 }
 
 impl FromStr for Board {
-    type Err = ParseIntError;
+    type Err = AdventError;
 
-    fn from_str(input: &str) -> Result<Self, ParseIntError> {
+    fn from_str(input: &str) -> Result<Self, AdventError> {
         let lines: Vec<Vec<isize>> = input.trim().split('\n')
             .map(|line| line.split_whitespace()
                 .map(|i| i.parse())
@@ -122,22 +122,22 @@ fn bingo_last(order: &[isize], mut boards: Vec<Board>) -> isize {
     last_score
 }
 
-fn parse(input: &str) -> Result<(Vec<isize>, Vec<Board>), InvalidInput> {
+fn parse(input: &str) -> Result<(Vec<isize>, Vec<Board>), AdventError> {
     let mut blocks = input.split("\n\n");
 
     let order = blocks.next()
-        .ok_or(InvalidInput)?
+        .ok_or(AdventError::NotEnoughElements)?
         .split(',')
-        .map(|s| s.parse().map_err(|_| InvalidInput))
+        .map(|s| s.parse())
         .collect::<Result<_, _>>()?;
 
     let mut boards = Vec::new();
 
     for block in blocks {
         if block.trim().is_empty() {
-            return Err(InvalidInput);
+            return Err(AdventError::NotEnoughElements);
         }
-        let board = block.parse().map_err(|_| InvalidInput)?;
+        let board = block.parse()?;
         boards.push(board);
     }
 

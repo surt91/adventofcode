@@ -1,10 +1,10 @@
 use std::{collections::HashMap, str::FromStr, fmt, cmp::max};
 
-use crate::utils::{read_lines, InvalidInput};
+use crate::utils::{AdventError, read_lines};
 
 pub fn run() -> (usize, usize) {
     let lines = read_lines("data/day05a.dat");
-    let data = parse(&lines);
+    let data = parse(&lines).expect("invalid input");
 
     (
         count(&data, 2, false),
@@ -69,28 +69,30 @@ impl fmt::Display for Point {
 }
 
 impl FromStr for Point {
-    type Err = InvalidInput;
+    type Err = AdventError;
 
-    fn from_str(input: &str) -> Result<Self, InvalidInput> {
+    fn from_str(input: &str) -> Result<Self, AdventError> {
         let mut p = input.split(',');
 
-        let x = p.next().ok_or(InvalidInput)?
-            .parse()
-            .map_err(|_| InvalidInput)?;
-        let y = p.next().ok_or(InvalidInput)?
-            .parse()
-            .map_err(|_| InvalidInput)?;
+        let x = p.next().ok_or(AdventError::NotEnoughElements)?
+            .parse()?;
+        let y = p.next().ok_or(AdventError::NotEnoughElements)?
+            .parse()?;
 
         Ok(Point {x, y})
     }
 }
 
-fn parse(lines: &[String]) -> Vec<(Point, Point)> {
-    fn parse_line(line: &str) -> Result<(Point, Point), InvalidInput> {
+fn parse(lines: &[String]) -> Result<Vec<(Point, Point)>, AdventError> {
+    fn parse_line(line: &str) -> Result<(Point, Point), AdventError> {
         let mut points = line.split(" -> ");
 
-        let p1 = points.next().ok_or(InvalidInput)?.parse()?;
-        let p2 = points.next().ok_or(InvalidInput)?.parse()?;
+        let p1 = points.next()
+            .ok_or(AdventError::NotEnoughElements)?
+            .parse()?;
+        let p2 = points.next()
+            .ok_or(AdventError::NotEnoughElements)?
+            .parse()?;
 
         Ok((p1, p2))
     }
@@ -99,8 +101,7 @@ fn parse(lines: &[String]) -> Vec<(Point, Point)> {
         .map(|line|
             parse_line(line)
         )
-        .collect::<Result<_, _>>()
-        .expect("invalid input")
+        .collect()
 }
 
 #[cfg(test)]
@@ -125,7 +126,7 @@ mod tests {
         ";
 
         let lines = split_lines(input);
-        let data = parse(&lines);
+        let data = parse(&lines).expect("invalid input");
 
         assert_eq!(count(&data, 2, false), 5);
         assert_eq!(count(&data, 2, true), 12);

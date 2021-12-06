@@ -1,7 +1,8 @@
-use super::utils::read_lines;
+use crate::utils::{AdventError, read_lines};
 
 pub fn run() -> (i64, i64) {
-    let actions = read_lines("data/day02a.dat");
+    let lines = read_lines("data/day02a.dat");
+    let actions = parse(&lines).expect("invalid input");
 
     (
         navigate(&actions),
@@ -9,46 +10,63 @@ pub fn run() -> (i64, i64) {
     )
 }
 
-fn navigate(actions: &[String]) -> i64 {
+fn navigate(actions: &[Direction]) -> i64 {
     let mut depth = 0i64;
     let mut position = 0i64;
+
     for action in actions {
-        if let [direction, magnitude_string] = action.split(' ').collect::<Vec<&str>>()[..] {
-            let magnitude = magnitude_string.parse::<i64>().expect("invalid input");
-            match direction {
-                "forward" => position += magnitude,
-                "up" => depth -= magnitude,
-                "down" => depth += magnitude,
-                _ => panic!("invalid input")
-            }
-        }
+        match action {
+            Direction::Forward(magnitude) => position += magnitude,
+            Direction::Up(magnitude) => depth -= magnitude,
+            Direction::Down(magnitude) => depth += magnitude,
+        };
     }
 
     depth * position
 }
 
-fn aim(actions: &[String]) -> i64 {
+fn aim(actions: &[Direction]) -> i64 {
     let mut aim = 0i64;
     let mut depth = 0i64;
     let mut position = 0i64;
+
     for action in actions {
-        if let [direction, magnitude_string] = action.split(' ').collect::<Vec<&str>>()[..] {
-            let magnitude = magnitude_string.parse::<i64>().expect("invalid input");
-            match direction {
-                "forward" => {
-                    position += magnitude;
-                    depth += aim * magnitude;
-                },
-                "up" => aim -= magnitude,
-                "down" => aim += magnitude,
-                _ => panic!("invalid input")
-            }
-        } else {
-            panic!("invalid input")
-        }
+        match action {
+            Direction::Forward(magnitude) => {
+                position += magnitude;
+                depth += aim * magnitude;
+            },
+            Direction::Up(magnitude) => aim -= magnitude,
+            Direction::Down(magnitude) => aim += magnitude,
+        };
     }
 
     depth * position
+}
+
+enum Direction {
+    Forward(i64),
+    Up(i64),
+    Down(i64)
+}
+
+fn parse(input: &[String]) -> Result<Vec<Direction>, AdventError> {
+    input.iter().map(|action| {
+        if let [direction, magnitude_string] = action.split(' ').collect::<Vec<&str>>()[..] {
+            let magnitude = magnitude_string.parse()?;
+            match direction {
+                "forward" => Ok(Direction::Forward(magnitude)),
+                "up" => Ok(Direction::Up(magnitude)),
+                "down" => Ok(Direction::Down(magnitude)),
+                _ => Err(AdventError::UnexpectedElement {
+                    found: direction.to_string(),
+                    expected: vec!["forward".to_string(), "up".to_string(), "down".to_string()]
+                })
+            }
+        } else {
+            Err(AdventError::NotEnoughElements)
+        }
+    }).collect()
 }
 
 #[cfg(test)]
@@ -68,7 +86,8 @@ mod tests {
             forward 2
         ";
 
-        let actions = split_lines(input);
+        let lines = split_lines(input);
+        let actions = parse(&lines).expect("invalid input");
 
         assert_eq!(navigate(&actions), 150);
         assert_eq!(aim(&actions), 900);

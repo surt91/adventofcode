@@ -1,10 +1,10 @@
 use itermore::IterMore;
 
-use super::utils::read_lines;
+use crate::utils::{AdventError, read_lines};
 
 pub fn run() -> (i32, i32) {
     let lines = read_lines("data/day01a.dat");
-    let data = parse(&lines);
+    let data = parse(&lines).expect("invalid input");
 
     (
         sonar(&data),
@@ -28,11 +28,11 @@ fn three(data: &[i32]) -> i32 {
         .count() as i32
 }
 
-fn parse(lines: &[String]) -> Vec<i32> {
+fn parse(lines: &[String]) -> Result<Vec<i32>, AdventError> {
     lines.iter()
         .map(|line|
-            line.parse::<i32>()
-                .expect("invalid input data!")
+            line.parse()
+                .map_err(AdventError::Parser)
         )
         .collect()
 }
@@ -59,7 +59,7 @@ mod tests {
         ";
 
         let lines = split_lines(input);
-        let data = parse(&lines);
+        let data = parse(&lines).expect("invalid input");
 
         assert_eq!(sonar(&data), 7);
         assert_eq!(three(&data), 5);

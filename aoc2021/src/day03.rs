@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use super::utils::read_lines;
+use crate::utils::read_lines;
 
 pub fn run() -> (i64, i64) {
     let diagnostics = read_lines("data/day03a.dat");

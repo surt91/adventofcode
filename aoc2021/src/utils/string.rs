@@ -1,4 +1,4 @@
-use std::{fs, fmt, error::Error};
+use std::fs;
 
 pub fn read_lines(file: &str) -> Vec<String> {
     let input = fs::read_to_string(file).expect("input file does not exist");
@@ -13,13 +13,3 @@ pub fn split_lines(input: &str) -> Vec<String> {
         .collect()
 }
 
-#[derive(Debug, Clone)]
-pub struct InvalidInput;
-
-impl fmt::Display for InvalidInput {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "invalid input")
-    }
-}
-
-impl Error for InvalidInput {}

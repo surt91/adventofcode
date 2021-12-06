@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr, fmt, ops::Add, cmp::max};
+use std::{collections::HashMap, str::FromStr, fmt, cmp::max};
 
 use crate::utils::{read_lines, InvalidInput};
 
@@ -59,17 +59,6 @@ struct Point {
 impl Point {
     fn new(x: isize, y: isize) -> Self {
         Point {x, y}
-    }
-}
-
-impl Add for &Point {
-    type Output = Point;
-
-    fn add(self, other: Self) -> Point {
-        Point {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
     }
 }
 

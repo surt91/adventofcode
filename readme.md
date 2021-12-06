@@ -1,5 +1,7 @@
 # :christmas_tree: Advent of Code
 
+[![Rust](https://github.com/surt91/adventofcode/actions/workflows/rust.yml/badge.svg)](https://github.com/surt91/adventofcode/actions/workflows/rust.yml)
+
 My solutions for Advent of Code.
 
 ## :hammer_and_wrench: Setup

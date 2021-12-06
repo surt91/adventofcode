@@ -1,0 +1,25 @@
+name: Rust
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build 2021
+      working-directory: aoc2021
+      run: cargo build --verbose
+    - name: Run tests 2021
+      working-directory: aoc2021
+      run: cargo test --verbose

@@ -1,8 +1,8 @@
-use crate::utils::{AdventError, read_lines};
+use crate::utils::{read_lines, parse_single_line};
 
 pub fn run() -> (isize, isize) {
     let lines = read_lines("data/day07a.dat");
-    let data = parse(&lines[0]).expect("invalid input");
+    let data = parse_single_line(&lines[0]).expect("invalid input");
 
     (
         fuel_cost(&data, false),
@@ -32,15 +32,6 @@ fn cost(positions: &[isize], test: isize, correct: bool) -> isize {
     }
 }
 
-fn parse(input: &str) -> Result<Vec<isize>, AdventError> {
-    input.split(',')
-        .map(|i|
-            i.parse()
-                .map_err(AdventError::Parser)
-        )
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -49,7 +40,7 @@ mod tests {
     fn example() {
         let input = r"16,1,2,0,4,2,7,1,2,14";
 
-        let data = parse(input).expect("invalid input");
+        let data = parse_single_line(input).expect("invalid input");
 
         assert_eq!(fuel_cost(&data, false), 37);
         assert_eq!(fuel_cost(&data, true), 168);

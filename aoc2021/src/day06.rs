@@ -1,8 +1,8 @@
-use crate::utils::{AdventError, read_lines};
+use crate::utils::{read_lines, parse_single_line};
 
 pub fn run() -> (usize, usize) {
     let lines = read_lines("data/day06a.dat");
-    let data = parse(&lines[0]).expect("invalid input");
+    let data = parse_single_line(&lines[0]).expect("invalid input");
 
     (
         num_fish(&data, 80),
@@ -49,15 +49,6 @@ impl LanternfishSchool {
     }
 }
 
-fn parse(input: &str) -> Result<Vec<u8>, AdventError> {
-    input.split(',')
-        .map(|i|
-            i.parse()
-                .map_err(AdventError::Parser)
-        )
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -66,7 +57,7 @@ mod tests {
     fn example() {
         let input = r"3,4,3,1,2";
 
-        let data = parse(input).expect("invalid input");
+        let data = parse_single_line(input).expect("invalid input");
 
         assert_eq!(num_fish(&data, 18), 26);
         assert_eq!(num_fish(&data, 80), 5934);

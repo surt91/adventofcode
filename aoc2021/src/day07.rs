@@ -5,30 +5,31 @@ pub fn run() -> (isize, isize) {
     let data = parse(&lines[0]).expect("invalid input");
 
     (
-        fuel_cost(&data),
-        0
+        fuel_cost(&data, false),
+        fuel_cost(&data, true),
     )
 }
 
-fn fuel_cost(positions: &[isize]) -> isize {
+fn fuel_cost(positions: &[isize], correct: bool) -> isize {
     // I could use a far better minimization here, but for the small input something stupid is good enough
     let &low = positions.iter().min().unwrap();
     let &high = positions.iter().max().unwrap();
 
-    let mut best_cost = (high - low) * positions.len() as isize;
-
-    for i in low..=high {
-        let c = cost(positions, i);
-        if c < best_cost {
-            best_cost = c;
-        }
-    }
-
-    best_cost
+    (low..=high).map(|x| cost(positions, x, correct))
+        .min()
+        .unwrap()
 }
 
-fn cost(positions: &[isize], test: isize) -> isize {
-    positions.iter().map(|x| (x - test).abs()).sum()
+fn cost(positions: &[isize], test: isize, correct: bool) -> isize {
+    let tmp = positions.iter()
+        .map(|x| (x - test).abs());
+
+    if correct {
+        tmp.map(|dist| (dist*(dist+1)) / 2)
+            .sum()
+    } else {
+        tmp.sum()
+    }
 }
 
 fn parse(input: &str) -> Result<Vec<isize>, AdventError> {
@@ -50,6 +51,7 @@ mod tests {
 
         let data = parse(input).expect("invalid input");
 
-        assert_eq!(fuel_cost(&data), 37);
+        assert_eq!(fuel_cost(&data, false), 37);
+        assert_eq!(fuel_cost(&data, true), 168);
     }
 }

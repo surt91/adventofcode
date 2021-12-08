@@ -9,7 +9,6 @@ edition = "2021"
 itermore = "0.1.0"
 itertools = "0.10.1"
 thiserror = "1.0.30"
-splr = { version = "0.14.0", features = ["incremental_solver"] }
 
 [dev-dependencies]
 criterion = "0.3"

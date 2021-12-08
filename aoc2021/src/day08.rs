@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::utils::{read_lines, AdventError};
 
 type Line = ([String; 10], [String; 4]);
@@ -20,16 +22,13 @@ type Line = ([String; 10], [String; 4]);
 // .    f  e    f  .    f  e    f  .    f
 //  gggg    gggg    ....    gggg    gggg
 
-const NUM2SEGMENTS: [usize; 10] = [6, 2, 5, 5, 4, 5, 5, 3, 7, 6];
-
-
 pub fn run() -> (usize, usize) {
     let lines = read_lines("data/day08a.dat");
     let parsed = parse(&lines).expect("invalid input");
 
     (
         num_1478(&parsed),
-        0,
+        sum(&parsed),
     )
 }
 
@@ -39,6 +38,98 @@ fn num_1478(results: &[Line]) -> usize {
         .flatten()
         .filter(|ele| matches!(ele.len(), 2|4|3|7))
         .count()
+}
+
+fn sum(input: &[Line]) -> usize {
+    input.iter().map(|line| {
+        let table = decode_line(line);
+        line.1.iter().rev().enumerate().map(|(n, digit)| {
+            let d = segments2digit(&table, digit);
+            d as usize * 10usize.pow(n as u32)
+        }).sum::<usize>()
+    }).sum()
+}
+
+fn segments2digit(translation: &HashMap<char, char>, segments: &str) -> u8 {
+    let mut translated: Vec<char> = segments.chars().map(|c| translation[&c]).collect();
+    translated.sort_unstable();
+    let translated: String = translated.iter().collect();
+
+    match translated.as_str() {
+        "abcefg" => 0,
+        "cf" => 1,
+        "acdeg" => 2,
+        "acdfg" => 3,
+        "bcdf" => 4,
+        "abdfg" => 5,
+        "abdefg" => 6,
+        "acf" => 7,
+        "abcdefg" => 8,
+        "abcdfg" => 9,
+        _ => panic!("invalid input")
+    }
+}
+
+// this is what I call brute force...
+fn decode_line(line: &Line) -> HashMap<char, char> {
+    let numbers = &line.0;
+    let mut translation: HashMap<char, char> = HashMap::new();
+
+    let one: HashSet<char> = numbers.iter().find(|x| x.len() == 2).unwrap().chars().collect();
+    let four: HashSet<char> = numbers.iter().find(|x| x.len() == 4).unwrap().chars().collect();
+    let seven: HashSet<char> = numbers.iter().find(|x| x.len() == 3).unwrap().chars().collect();
+    let eight: HashSet<char> = numbers.iter().find(|x| x.len() == 7).unwrap().chars().collect();
+
+    let mut zero_or_nine_or_six = numbers.iter().filter(|x| x.len() == 6);
+
+    let c096a: HashSet<char> = zero_or_nine_or_six.next().unwrap().chars().collect();
+    let c096b: HashSet<char> = zero_or_nine_or_six.next().unwrap().chars().collect();
+    let c096c: HashSet<char> = zero_or_nine_or_six.next().unwrap().chars().collect();
+
+    let (six, c09a, c09b) = if one.difference(&c096a).count() == 1 {
+        (c096a, c096b, c096c)
+    } else if one.difference(&c096b).count() == 1 {
+        (c096b, c096a, c096c)
+    } else if one.difference(&c096c).count() == 1 {
+        (c096c, c096b, c096a)
+    } else {
+        panic!("invalid input");
+    };
+
+    let c = one.difference(&six).next().unwrap();
+    translation.insert(*c, 'c');
+
+    // the difference between 1 and 7 -> a
+    let a = seven.difference(&one).next().unwrap();
+    translation.insert(*a, 'a');
+
+    let (zero, nine) = if four.difference(&c09a).count() == 0 {
+        (c09b, c09a)
+    } else {
+        (c09a, c09b)
+    };
+
+    let d = eight.difference(&zero).next().unwrap();
+    translation.insert(*d, 'd');
+    let e = eight.difference(&nine).next().unwrap();
+    translation.insert(*e, 'e');
+
+    let mut four_a = four;
+    four_a.insert(*a);
+    let g = nine.difference(&four_a).next().unwrap();
+    translation.insert(*g, 'g');
+
+    let mut seven_ge = seven.clone();
+    seven_ge.insert(*g);
+    seven_ge.insert(*e);
+
+    let b = zero.difference(&seven_ge).next().unwrap();
+    translation.insert(*b, 'b');
+
+    let f = one.intersection(&six).next().unwrap();
+    translation.insert(*f, 'f');
+
+    translation
 }
 
 fn parse(input: &[String]) -> Result<Vec<Line>, AdventError> {
@@ -82,5 +173,6 @@ mod tests {
         let lines = parse(&split_lines(input)).expect("invalid input");
 
         assert_eq!(num_1478(&lines), 26);
+        assert_eq!(sum(&lines), 61229);
     }
 }

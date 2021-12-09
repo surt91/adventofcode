@@ -1,4 +1,4 @@
-use std::{str::FromStr, fs};
+use std::{str::FromStr, fs, iter};
 
 use crate::utils::AdventError;
 
@@ -56,14 +56,15 @@ impl Map {
 
         for (x, y) in self.find_lowpoints() {
             let mut score: usize = 0;
-            let mut candidates = self.neighbors(x, y);
-            while !candidates.is_empty() {
-                let (cx, cy) = candidates.pop().unwrap();
+            let mut candidates: Vec<(usize, usize)> = self.neighbors(x, y).collect();
+            while let Some((cx, cy)) = candidates.pop() {
                 if visited[cy][cx] || self.depths[cy][cx] == 9 {
                     continue;
                 }
                 visited[cy][cx] = true;
-                candidates.append(&mut self.neighbors(cx, cy));
+                let unvisited_neighbors = self.neighbors(cx, cy)
+                    .filter(|&(i, j)| !visited[j][i]);
+                candidates.extend(unvisited_neighbors);
                 score += 1;
             }
             scores.push(score)
@@ -73,17 +74,16 @@ impl Map {
         scores
     }
 
-    fn neighbors(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
-        let neighbors = vec![
-            if y == 0 {None} else {Some((x, y-1))},
+    fn neighbors(&self, x: usize, y: usize) -> impl Iterator<Item=(usize, usize)> {
+        iter::once(
+            if y == 0 {None} else {Some((x, y-1))}
+        ).chain(iter::once(
             if y >= self.height - 1  {None} else {Some((x, y+1))},
+        )).chain(iter::once(
             if x == 0 {None} else {Some((x-1, y))},
+        )).chain(iter::once(
             if x >= self.width - 1 {None} else {Some((x+1, y))},
-        ];
-
-        neighbors.into_iter()
-            .flatten()
-            .collect()
+        )).flatten()
     }
 
     fn find_lowpoints(&self) -> Vec<(usize, usize)> {
@@ -92,8 +92,8 @@ impl Map {
             for x in 0..self.width {
                 let depth = self.depths[y][x];
 
-                if self.neighbors(x, y).iter()
-                    .all(|&(x, y)| depth < self.depths[y][x])
+                if self.neighbors(x, y)
+                    .all(|(x, y)| depth < self.depths[y][x])
                 {
                     output.push((x, y));
                 }

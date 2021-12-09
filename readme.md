@@ -31,7 +31,7 @@ cargo test day02
 or run all tests with
 
 ```bash
-cargo test day02
+cargo test
 ```
 
 ## :robot: Benchmarks

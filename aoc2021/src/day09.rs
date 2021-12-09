@@ -2,25 +2,6 @@ use std::{str::FromStr, fs, iter};
 
 use crate::utils::AdventError;
 
-
-// 0:      1:      2:      3:      4:
-//  aaaa    ....    aaaa    aaaa    ....
-// b    c  .    c  .    c  .    c  b    c
-// b    c  .    c  .    c  .    c  b    c
-//  ....    ....    dddd    dddd    dddd
-// e    f  .    f  e    .  .    f  .    f
-// e    f  .    f  e    .  .    f  .    f
-//  gggg    ....    gggg    gggg    ....
-
-// 5:      6:      7:      8:      9:
-//  aaaa    aaaa    aaaa    aaaa    aaaa
-// b    .  b    .  .    c  b    c  b    c
-// b    .  b    .  .    c  b    c  b    c
-//  dddd    dddd    ....    dddd    dddd
-// .    f  e    f  .    f  e    f  .    f
-// .    f  e    f  .    f  e    f  .    f
-//  gggg    gggg    ....    gggg    gggg
-
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day09a.dat").expect("input file does not exist");
     let map: Map = input.parse().expect("invalid input");
@@ -29,6 +10,13 @@ pub fn run() -> (usize, usize) {
         map.risk(),
         map.basins(),
     )
+}
+
+#[derive(PartialEq, Clone)]
+enum NodeState {
+    Unseen,
+    Seen,
+    Visited
 }
 
 struct Map {
@@ -51,20 +39,24 @@ impl Map {
     }
 
     fn find_basin_sizes(&self) -> Vec<usize> {
-        let mut visited = vec![vec![false; self.width]; self.height];
+        let mut visited = vec![vec![NodeState::Unseen; self.width]; self.height];
         let mut scores = Vec::new();
 
         for (x, y) in self.find_lowpoints() {
             let mut score: usize = 0;
-            let mut candidates: Vec<(usize, usize)> = self.neighbors(x, y).collect();
+            let mut candidates: Vec<_> = self.neighbors(x, y).collect();
             while let Some((cx, cy)) = candidates.pop() {
-                if visited[cy][cx] || self.depths[cy][cx] == 9 {
+                if visited[cy][cx] == NodeState::Visited || self.depths[cy][cx] == 9 {
                     continue;
                 }
-                visited[cy][cx] = true;
-                let unvisited_neighbors = self.neighbors(cx, cy)
-                    .filter(|&(i, j)| !visited[j][i]);
-                candidates.extend(unvisited_neighbors);
+                visited[cy][cx] = NodeState::Visited;
+                let unseen_neighbors = self.neighbors(cx, cy)
+                    .filter(|&(i, j)| {
+                        let b = visited[j][i] == NodeState::Unseen;
+                        if b {visited[j][i] = NodeState::Seen};
+                        b
+                    });
+                candidates.extend(unseen_neighbors);
                 score += 1;
             }
             scores.push(score)

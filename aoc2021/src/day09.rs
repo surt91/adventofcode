@@ -1,4 +1,6 @@
-use crate::utils::{read_lines};
+use std::{str::FromStr, fs};
+
+use crate::utils::AdventError;
 
 
 // 0:      1:      2:      3:      4:
@@ -20,56 +22,118 @@ use crate::utils::{read_lines};
 //  gggg    gggg    ....    gggg    gggg
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day09a.dat");
-    let parsed = parse(&lines);
+    let input = fs::read_to_string("data/day09a.dat").expect("input file does not exist");
+    let map: Map = input.parse().expect("invalid input");
 
     (
-        risk(&parsed),
-        0,
+        map.risk(),
+        map.basins(),
     )
 }
 
-fn risk(map: &[Vec<u8>]) -> usize {
-    let width = map[0].len();
-    let height = map.len();
-    assert!(map.iter().all(|l| l.len() == width));
-
-    let mut risk_rating = 0;
-    for y in 0..height {
-        for x in 0..width {
-            let depth = map[y][x];
-            let neighbors = vec![
-                if y == 0 {None} else {Some(&map[y-1][x])},
-                map.get(y+1).and_then(|line| line.get(x)),
-                if x == 0 {None} else {Some(&map[y][x-1])},
-                map[y].get(x+1),
-            ];
-
-            if neighbors.iter()
-                .filter(|n| n.is_some())
-                .all(|n| depth < *n.unwrap())
-            {
-                risk_rating += 1 + depth as usize
-            }
-        }
-    }
-
-    risk_rating
+struct Map {
+    width: usize,
+    height: usize,
+    depths: Vec<Vec<u8>>
 }
 
-fn parse(strings: &[String]) -> Vec<Vec<u8>> {
-    strings.iter().map(|line|
-        line.chars()
-            .map(|c| c.to_digit(10)
-                .unwrap() as u8
-            ).collect()
-    ).collect()
+impl Map {
+    fn risk(&self) -> usize {
+        self.find_lowpoints().iter().map(|&(x, y)| self.depths[y][x] as usize + 1).sum()
+    }
+
+    fn basins(&self) -> usize {
+        self.find_basin_sizes()
+            .iter()
+            .rev()
+            .take(3)
+            .product()
+    }
+
+    fn find_basin_sizes(&self) -> Vec<usize> {
+        let mut visited = vec![vec![false; self.width]; self.height];
+        let mut scores = Vec::new();
+
+        for (x, y) in self.find_lowpoints() {
+            let mut score: usize = 0;
+            let mut candidates = self.neighbors(x, y);
+            while !candidates.is_empty() {
+                let (cx, cy) = candidates.pop().unwrap();
+                if visited[cy][cx] || self.depths[cy][cx] == 9 {
+                    continue;
+                }
+                visited[cy][cx] = true;
+                candidates.append(&mut self.neighbors(cx, cy));
+                score += 1;
+            }
+            scores.push(score)
+        }
+
+        scores.sort_unstable();
+        scores
+    }
+
+    fn neighbors(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+        let neighbors = vec![
+            if y == 0 {None} else {Some((x, y-1))},
+            if y >= self.height - 1  {None} else {Some((x, y+1))},
+            if x == 0 {None} else {Some((x-1, y))},
+            if x >= self.width - 1 {None} else {Some((x+1, y))},
+        ];
+
+        neighbors.into_iter()
+            .flatten()
+            .collect()
+    }
+
+    fn find_lowpoints(&self) -> Vec<(usize, usize)> {
+        let mut output = Vec::new();
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let depth = self.depths[y][x];
+
+                if self.neighbors(x, y).iter()
+                    .all(|&(x, y)| depth < self.depths[y][x])
+                {
+                    output.push((x, y));
+                }
+            }
+        }
+
+        output
+    }
+}
+
+impl FromStr for Map {
+    type Err = AdventError;
+
+    fn from_str(input: &str) -> Result<Self, AdventError> {
+        let depths: Vec<Vec<u8>> = input.trim().split('\n')
+            .map(|line| line.trim().chars()
+                .map(|c|
+                    c.to_digit(10)
+                    .map(|x| x as u8)
+                    .ok_or(
+                        AdventError::UnexpectedElement{found: c.to_string(), expected: vec!["a number".to_string()]})
+                    ).collect::<Result<_, _>>()
+                ).collect::<Result<_, _>>()?;
+
+        let width = depths[0].len();
+        let height = depths.len();
+        assert!(depths.iter().all(|l| l.len() == width));
+
+        Ok(
+            Map {
+                width,
+                height,
+                depths
+            }
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::split_lines;
-
     use super::*;
 
     #[test]
@@ -82,8 +146,9 @@ mod tests {
             9899965678
         ";
 
-        let lines = parse(&split_lines(input));
+        let map: Map = input.parse().expect("invalid input");
 
-        assert_eq!(risk(&lines), 15);
+        assert_eq!(map.risk(), 15);
+        assert_eq!(map.basins(), 1134);
     }
 }

@@ -1,6 +1,6 @@
 use std::{str::FromStr, fs, iter};
 
-use crate::utils::AdventError;
+use crate::utils::{AdventError, UnionFind};
 
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day09a.dat").expect("input file does not exist");
@@ -39,8 +39,55 @@ impl Map {
     }
 
     fn find_basin_sizes(&self) -> Vec<usize> {
-        let mut visited = vec![vec![NodeState::Unseen; self.width]; self.height];
         let mut scores = Vec::new();
+
+        let num = self.width * self.height;
+        let mut uf = UnionFind::new(num);
+        let mut low = Vec::new();
+
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if self.depths[y][x] >= 9 {
+                    continue;
+                }
+                let depth = self.depths[y][x];
+                let mut local_min = true;
+                for (nx, ny) in self.neighbors(x, y) {
+                    if self.depths[ny][nx] < 9 {
+                        uf.union(self.width * y + x, self.width * ny + nx);
+                        local_min &= depth < self.depths[ny][nx]
+                    }
+                }
+                if local_min {
+                    low.push((x, y));
+                }
+            }
+        }
+
+        for (x, y) in low {
+            let j = uf.find(self.width * y + x);
+            let s = uf.size(j);
+            scores.push(s);
+        }
+
+        scores.sort_unstable();
+        scores
+    }
+
+    // the old DFS solution (which was 5% slower in my benchmarks)
+    // but I like it enough that I do not want to delete it
+    #[allow(dead_code)]
+    fn basins_dfs(&self) -> usize {
+        self.find_basin_sizes_dfs()
+            .iter()
+            .rev()
+            .take(3)
+            .product()
+    }
+
+    fn find_basin_sizes_dfs(&self) -> Vec<usize> {
+        let mut scores = Vec::new();
+        let mut visited = vec![vec![NodeState::Unseen; self.width]; self.height];
 
         for (x, y) in self.find_lowpoints() {
             let mut score: usize = 0;
@@ -142,5 +189,6 @@ mod tests {
 
         assert_eq!(map.risk(), 15);
         assert_eq!(map.basins(), 1134);
+        assert_eq!(map.basins_dfs(), 1134);
     }
 }

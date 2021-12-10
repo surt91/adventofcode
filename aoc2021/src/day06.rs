@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::utils::{read_lines, parse_single_line};
 
 pub fn run() -> (usize, usize) {
@@ -20,12 +22,12 @@ fn num_fish(initial_conditions: &[u8], iterations: usize) -> usize {
 
 struct LanternfishSchool {
     // at each index is the number of fish with the `internal timer` equal to the index
-    internal_timers: Vec<usize>
+    internal_timers: VecDeque<usize>
 }
 
 impl LanternfishSchool {
     fn new(individuals: &[u8]) -> Self {
-        let mut internal_timers = vec![0; 9];
+        let mut internal_timers = VecDeque::from(vec![0; 9]);
 
         for &i in individuals {
             internal_timers[i as usize] += 1;
@@ -43,9 +45,8 @@ impl LanternfishSchool {
     }
 
     fn step(&mut self) {
-        let new_fish = self.internal_timers.remove(0);
-        self.internal_timers.push(new_fish);
-        self.internal_timers[6] += new_fish;
+        self.internal_timers.rotate_left(1);
+        self.internal_timers[6] += self.internal_timers[8];
     }
 }
 

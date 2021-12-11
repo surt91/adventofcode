@@ -11,7 +11,7 @@ pub fn run() -> (usize, usize) {
 
     (
         map.count_flashes(),
-        0,
+        map.synchronized() + 100,
     )
 }
 
@@ -24,6 +24,14 @@ struct Map {
 impl Map {
     fn count_flashes(&mut self) -> usize {
         iter::repeat_with(|| self.step()).take(100).sum()
+    }
+
+    fn synchronized(&mut self) -> usize {
+        let mut ctr = 1;
+        while self.step() < 100 {
+            ctr += 1
+        }
+        ctr
     }
 
     fn neighbors(&self, x: usize, y: usize) -> impl Iterator<Item=(usize, usize)> {
@@ -139,10 +147,7 @@ mod tests {
 
         let mut map: Map = input.parse().expect("invalid input");
 
-        // map.step();
-        // map.step();
-        // map.step();
-        // assert_eq!(0, 1656);
         assert_eq!(map.count_flashes(), 1656);
+        assert_eq!(map.synchronized() + 100, 195);
     }
 }

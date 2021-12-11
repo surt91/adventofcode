@@ -28,6 +28,7 @@ fn main() {
             Ok(8) => show(day08::run()),
             Ok(9) => show(day09::run()),
             Ok(10) => show(day10::run()),
+            Ok(11) => show(day11::run()),
             Err(e) => println!("Invalid Argument: {}.", e),
             _ => println!("Is not solved yet!")
         }
@@ -49,5 +50,6 @@ mod tests {
         day08: (301, 908067),
         day09: (514, 1103130),
         day10: (193275, 2429644557),
+        day11: (1603, 0),
     }
 }

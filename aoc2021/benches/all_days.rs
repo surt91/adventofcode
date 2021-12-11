@@ -23,6 +23,7 @@ day_benches!{
     day08,
     day09,
     day10,
+    day11,
 }
 
 criterion_main!(benches);

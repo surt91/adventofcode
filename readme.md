@@ -20,6 +20,12 @@ and run the problems of the specified days
 cargo run --release -- 2 4 6
 ```
 
+or of all days
+
+```bash
+cargo run --release
+```
+
 ## :test_tube: Tests
 
 Run the tests for a specific day with

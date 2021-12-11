@@ -2,35 +2,41 @@ use aoc2021::*;
 
 use std::{env, fmt::Display};
 
+use colored::Colorize;
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<_> = env::args().collect();
 
     if args.len() < 2 {
-        println!("Sepcify for which day the the solution should be printed.")
+        // without argument, run all
+        args = (0..=25).map(|n| format!("{}", n)).collect();
     }
 
-    fn show<T, U>((a, b): (T, U))
+    fn show<T, U>(n: usize, (a, b): (T, U))
         where T: Display, U: Display
     {
+        let title = format!("Day {}", n).yellow();
+        println!("{}", title);
         println!("{}", a);
         println!("{}", b);
+        println!();
     }
 
     for arg in &args[1..] {
-        match arg.parse::<i32>() {
-            Ok(1) => show(day01::run()),
-            Ok(2) => show(day02::run()),
-            Ok(3) => show(day03::run()),
-            Ok(4) => show(day04::run()),
-            Ok(5) => show(day05::run()),
-            Ok(6) => show(day06::run()),
-            Ok(7) => show(day07::run()),
-            Ok(8) => show(day08::run()),
-            Ok(9) => show(day09::run()),
-            Ok(10) => show(day10::run()),
-            Ok(11) => show(day11::run()),
+        match arg.parse::<usize>() {
+            Ok(n @ 1) => show(n, day01::run()),
+            Ok(n @ 2) => show(n, day02::run()),
+            Ok(n @ 3) => show(n, day03::run()),
+            Ok(n @ 4) => show(n, day04::run()),
+            Ok(n @ 5) => show(n, day05::run()),
+            Ok(n @ 6) => show(n, day06::run()),
+            Ok(n @ 7) => show(n, day07::run()),
+            Ok(n @ 8) => show(n, day08::run()),
+            Ok(n @ 9) => show(n, day09::run()),
+            Ok(n @ 10) => show(n, day10::run()),
+            Ok(n @ 11) => show(n, day11::run()),
+            Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {}", n).yellow()),
             Err(e) => println!("Invalid Argument: {}.", e),
-            _ => println!("Is not solved yet!")
         }
     }
 }

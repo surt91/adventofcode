@@ -8,31 +8,27 @@ pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day11a.dat").expect("input file does not exist");
     let mut map: Map = input.parse().expect("invalid input");
 
+    let num = 100;
+
     (
-        map.count_flashes(),
-        map.synchronized() + 100,
+        map.count_flashes(num),
+        map.synchronized() + num,
     )
 }
 
 impl Map {
-    fn count_flashes(&mut self) -> usize {
-        iter::repeat_with(|| self.step()).take(100).sum()
+    fn count_flashes(&mut self, num: usize) -> usize {
+        iter::repeat_with(|| self.step()).take(num).sum()
     }
 
     fn synchronized(&mut self) -> usize {
-        let mut ctr = 1;
-        while self.step() < 100 {
-            ctr += 1
-        }
-        ctr
+        iter::repeat_with(|| self.step()).take_while(|&x| x < 100).count() + 1
     }
 
     fn step(&mut self) -> usize {
         let mut ctr = 0;
 
-        for p in (0..self.width).cartesian_product(0..self.height) {
-            self[p] += 1
-        }
+        (0..self.width).cartesian_product(0..self.height).for_each(|p| self[p] += 1);
 
         let mut will_flash: Vec<_> = (0..self.width).cartesian_product(0..self.height)
             .filter(|&p| self[p] > 9)
@@ -79,8 +75,9 @@ mod tests {
         ";
 
         let mut map: Map = input.parse().expect("invalid input");
+        let num = 100;
 
-        assert_eq!(map.count_flashes(), 1656);
-        assert_eq!(map.synchronized() + 100, 195);
+        assert_eq!(map.count_flashes(num), 1656);
+        assert_eq!(map.synchronized() + num, 195);
     }
 }

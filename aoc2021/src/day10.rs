@@ -29,12 +29,11 @@ fn score(lines: &[String]) -> usize {
 fn middle_score(lines: &[String]) -> usize {
     let results = parse(lines);
 
-    let mut list = results.iter().filter(|r| r.is_ok()).map(|r| {
-        match r {
-            Ok(comp) => completion_score(comp),
-            Err(_) => panic!("invalid input")
-        }
-    }).collect::<Vec<usize>>();
+    let mut list = results.iter()
+        .flatten()
+        .map(|r| {
+            completion_score(r)
+        }).collect::<Vec<usize>>();
 
     list.sort_unstable();
     list[list.len() / 2]

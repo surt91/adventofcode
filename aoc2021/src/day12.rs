@@ -1,12 +1,12 @@
-use std::{collections::HashMap};
+use std::{collections::HashMap, str::FromStr, fs};
 
 use itertools::Itertools;
 
-use crate::utils::read_lines;
+use crate::utils::{AdventError, AdjList, Indexable};
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day12a.dat");
-    let g = parse(&lines);
+    let input = fs::read_to_string("data/day12a.dat").expect("invalid input");
+    let g: AdjList<Node> = input.parse().expect("invalid input");
 
     (
         g.count_paths(0),
@@ -20,8 +20,8 @@ enum Node {
     Large(usize)
 }
 
-impl Node {
-    fn unwrap(&self) -> usize {
+impl Indexable for Node {
+    fn idx(&self) -> usize {
         *match self {
             Node::Large(x) => x,
             Node::Small(x) => x,
@@ -29,34 +29,9 @@ impl Node {
     }
 }
 
-struct AdjList {
-    nodes: Vec<Node>,
-    adj: Vec<Vec<usize>>,
-}
-
-impl AdjList {
-    fn new(nodes: Vec<Node>) -> AdjList {
-        let adj = vec![Vec::new(); nodes.len()];
-        AdjList {
-            nodes,
-            adj,
-        }
-    }
-
-    fn add_edge(&mut self, s: Node, t: Node) {
-        let s = s.unwrap();
-        let t = t.unwrap();
-
-        self.adj[s].push(t);
-        self.adj[t].push(s);
-    }
-
-    fn neighbors(&self, u: usize) -> impl Iterator<Item=usize> + '_ {
-        self.adj[u].iter().cloned()
-    }
-
+impl AdjList<Node> {
     fn count_paths(&self, num_twice: usize) -> usize {
-        let mut visited: Vec<u8> = vec![0; self.nodes.len()];
+        let mut visited: Vec<u8> = vec![0; self.size()];
         let mut path: Vec<usize> = Vec::new();
         let mut ctr = 0;
         let mut joker = num_twice;
@@ -76,7 +51,7 @@ impl AdjList {
         ctr: &mut usize,
         joker: &mut usize
     ) {
-        if let Node::Small(_) = self.nodes[s] {
+        if let Node::Small(_) = self[s] {
             visited[s] += 1;
         }
         path.push(s);
@@ -97,59 +72,63 @@ impl AdjList {
         }
 
         path.pop();
-        if let Node::Small(_) = self.nodes[s] {
+        if let Node::Small(_) = self[s] {
             visited[s] -= 1;
         }
     }
 }
 
-fn parse(input: &[String]) -> AdjList {
-    let mut ctr = 1;
-    let mut map: HashMap<&str, Node> = HashMap::new();
+impl FromStr for AdjList<Node>
+{
+    type Err = AdventError;
 
-    let mut str_to_id = |input: &str| -> Node {
-        if input == "start" {
-            return Node::Small(0);
-        }
-        if input == "end" {
-            return Node::Small(1);
-        }
-        ctr += 1;
-        if input.chars().next().unwrap().is_uppercase() {
-            Node::Large(ctr)
-        } else {
-            Node::Small(ctr)
-        }
-    };
+    fn from_str(input: &str) -> Result<Self, AdventError> {
+        let mut ctr = 1;
+        let mut map: HashMap<&str, Node> = HashMap::new();
 
-    let mut edges = vec![];
-    for line in input.iter() {
-        let mut elements = line.split('-');
-        let u = elements.next().expect("invalid input");
-        let ui = *map.entry(u).or_insert_with(|| str_to_id(u));
-        let v = elements.next().expect("invalid input");
-        let vi = *map.entry(v).or_insert_with(|| str_to_id(v));
+        let mut str_to_id = |input: &str| -> Node {
+            if input == "start" {
+                return Node::Small(0);
+            }
+            if input == "end" {
+                return Node::Small(1);
+            }
+            ctr += 1;
+            if input.chars().next().unwrap().is_uppercase() {
+                Node::Large(ctr)
+            } else {
+                Node::Small(ctr)
+            }
+        };
 
-        edges.push((ui, vi));
+        // TODO: ideally, this should be done in a generic way in the graph module
+        let mut edges = vec![];
+        for line in input.trim().split('\n') {
+            let mut elements = line.trim().split('-');
+            let u = elements.next().ok_or(AdventError::NotEnoughElements)?;
+            let ui = *map.entry(u).or_insert_with(|| str_to_id(u));
+            let v = elements.next().ok_or(AdventError::NotEnoughElements)?;
+            let vi = *map.entry(v).or_insert_with(|| str_to_id(v));
+
+            edges.push((ui, vi));
+        }
+
+        let nodes = map.values()
+            .sorted_by(|a, b| Ord::cmp(&a.idx(), &b.idx()))
+            .cloned()
+            .collect::<Vec<Node>>();
+
+        let mut g = AdjList::new(nodes);
+        for (s, t) in edges {
+            g.add_edge(s, t);
+        }
+
+        Ok(g)
     }
-
-    let nodes = map.values()
-        .sorted_by(|a, b| Ord::cmp(&a.unwrap(), &b.unwrap()))
-        .cloned()
-        .collect::<Vec<Node>>();
-
-    let mut g = AdjList::new(nodes);
-    for (s, t) in edges {
-        g.add_edge(s, t);
-    }
-
-    g
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::split_lines;
-
     use super::*;
 
     #[test]
@@ -163,8 +142,7 @@ mod tests {
             A-end
             b-end
         ";
-        let lines = split_lines(input);
-        let g = parse(&lines);
+        let g: AdjList<Node> = input.parse().expect("invalid input");
         assert_eq!(g.count_paths(0), 10);
         assert_eq!(g.count_paths(1), 36);
 
@@ -180,8 +158,7 @@ mod tests {
             kj-HN
             kj-dc
         ";
-        let lines = split_lines(input);
-        let g = parse(&lines);
+        let g: AdjList<Node> = input.parse().expect("invalid input");
         assert_eq!(g.count_paths(0), 19);
         assert_eq!(g.count_paths(1), 103);
 
@@ -205,8 +182,7 @@ mod tests {
             pj-fs
             start-RW
         ";
-        let lines = split_lines(input);
-        let g = parse(&lines);
+        let g: AdjList<Node> = input.parse().expect("invalid input");
         assert_eq!(g.count_paths(0), 226);
         assert_eq!(g.count_paths(1), 3509);
     }

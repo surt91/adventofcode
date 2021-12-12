@@ -9,8 +9,8 @@ pub fn run() -> (usize, usize) {
     let g = parse(&lines);
 
     (
-        g.count_paths(),
-        0
+        g.count_paths(0),
+        g.count_paths(1),
     )
 }
 
@@ -55,13 +55,14 @@ impl AdjList {
         self.adj[u].iter().cloned()
     }
 
-    fn count_paths(&self) -> usize {
-        let mut visited: Vec<bool> = vec![false; self.nodes.len()];
+    fn count_paths(&self, num_twice: usize) -> usize {
+        let mut visited: Vec<u8> = vec![0; self.nodes.len()];
         let mut path: Vec<usize> = Vec::new();
         let mut ctr = 0;
+        let mut joker = num_twice;
 
         // 0 and 1 are magic values for start and end
-        self.find_all_paths_until(0, 1, &mut visited, &mut path, &mut ctr);
+        self.find_all_paths_until(0, 1, &mut visited, &mut path, &mut ctr, &mut joker);
 
         ctr
     }
@@ -70,14 +71,13 @@ impl AdjList {
         &self,
         s: usize,
         t: usize,
-        visited: &mut Vec<bool>,
+        visited: &mut Vec<u8>,
         path: &mut Vec<usize>,
-        ctr: &mut usize
+        ctr: &mut usize,
+        joker: &mut usize
     ) {
-        if let Node::Large(_) = self.nodes[s] {
-            visited[s] = false;
-        } else {
-            visited[s] = true;
+        if let Node::Small(_) = self.nodes[s] {
+            visited[s] += 1;
         }
         path.push(s);
 
@@ -86,14 +86,20 @@ impl AdjList {
             *ctr += 1;
         } else {
             for n in self.neighbors(s) {
-                if !visited[n] {
-                    self.find_all_paths_until(n, t, visited, path, ctr)
+                if visited[n] == 0 {
+                    self.find_all_paths_until(n, t, visited, path, ctr, joker);
+                } else if *joker > 0 && visited[n] == 1 && n > 1 {
+                    *joker -= 1;
+                    self.find_all_paths_until(n, t, visited, path, ctr, joker);
+                    *joker += 1;
                 }
             }
         }
 
         path.pop();
-        visited[s] = false;
+        if let Node::Small(_) = self.nodes[s] {
+            visited[s] -= 1;
+        }
     }
 }
 
@@ -132,8 +138,6 @@ fn parse(input: &[String]) -> AdjList {
         .cloned()
         .collect::<Vec<Node>>();
 
-    println!("{:?}, {:?}", nodes, edges);
-
     let mut g = AdjList::new(nodes);
     for (s, t) in edges {
         g.add_edge(s, t);
@@ -161,7 +165,8 @@ mod tests {
         ";
         let lines = split_lines(input);
         let g = parse(&lines);
-        assert_eq!(g.count_paths(), 10);
+        assert_eq!(g.count_paths(0), 10);
+        assert_eq!(g.count_paths(1), 36);
 
         let input = r"
             dc-end
@@ -177,7 +182,8 @@ mod tests {
         ";
         let lines = split_lines(input);
         let g = parse(&lines);
-        assert_eq!(g.count_paths(), 19);
+        assert_eq!(g.count_paths(0), 19);
+        assert_eq!(g.count_paths(1), 103);
 
         let input = r"
             fs-end
@@ -201,6 +207,7 @@ mod tests {
         ";
         let lines = split_lines(input);
         let g = parse(&lines);
-        assert_eq!(g.count_paths(), 226);
+        assert_eq!(g.count_paths(0), 226);
+        assert_eq!(g.count_paths(1), 3509);
     }
 }

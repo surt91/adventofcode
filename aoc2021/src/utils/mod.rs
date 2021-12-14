@@ -4,6 +4,7 @@ mod test;
 mod union_find;
 mod two_dimensional;
 mod graph;
+pub mod letters;
 
 pub use string::*;
 pub use advent_error::AdventError;

@@ -86,14 +86,16 @@ fn print_code(points: &[Point], folds: &[Fold]) -> String {
         points = fold(&points, f);
     }
 
-    let paper = draw_points_on_paper(&points);
+    let paper = draw_points_on_paper_transposed(&points);
 
     let sol = paper.split("\n\n")
         .map(recognize_letter)
         .collect::<Result<_,_>>();
     match sol {
         Ok(solution) => solution,
-        Err(_) => {println!("{}", draw_points_on_paper_transposed(&points)); "# parsing failed".to_string()}
+        Err(_) => {
+            println!("{}", draw_points_on_paper(&points));
+            "# parsing failed".to_string()}
     }
 }
 
@@ -121,7 +123,7 @@ fn fold(points: &HashSet<Point>, fold: &Fold) -> HashSet<Point> {
     }).collect()
 }
 
-fn draw_points_on_paper(points: &HashSet<Point>) -> String {
+fn draw_points_on_paper_transposed(points: &HashSet<Point>) -> String {
     let x_max = points.iter().map(|p| p.x).max().unwrap();
     let y_max = points.iter().map(|p| p.y).max().unwrap();
 
@@ -133,7 +135,7 @@ fn draw_points_on_paper(points: &HashSet<Point>) -> String {
     paper_to_string(&paper)
 }
 
-fn draw_points_on_paper_transposed(points: &HashSet<Point>) -> String {
+fn draw_points_on_paper(points: &HashSet<Point>) -> String {
     let x_max = points.iter().map(|p| p.x).max().unwrap();
     let y_max = points.iter().map(|p| p.y).max().unwrap();
 
@@ -155,110 +157,9 @@ fn paper_to_string(paper: &[Vec<bool>]) -> String {
 }
 
 fn recognize_letter(input: &str) -> Result<String, AdventError> {
-let h =
-r"
-######
-  #
-  #
-######
-";
-let o =
-"
-#####
-#   #
-#   #
-#   #
-#####
-";
-let g =
-"
- ####
-#    #
-#  # #
- # ###
-";
-let a =
-"
- #####
-#  #
-#  #
- #####
-";
-let j =
-"
-    #
-     #
-#    #
-#####
-";
-let b =
-"
-######
-# #  #
-# #  #
- # ##
-";
-let e =
-"
-######
-# #  #
-# #  #
-#    #
-";
-let c =
-"
- ####
-#    #
-#    #
- #  #
-";
-let l =
-"
-######
-     #
-     #
-     #
-";
-let k =
-"
-######
-  #
- # ##
-#    #
-";
-let r =
-"
-######
-#  #
-#  ##
- ##  #
-";
+    use crate::utils::letters::parse;
 
-    if input.trim() == a.trim() {
-        Ok("A".to_string())
-    } else if input.trim() == b.trim() {
-        Ok("B".to_string())
-    } else if input.trim() == c.trim() {
-        Ok("C".to_string())
-    } else if input.trim() == e.trim() {
-        Ok("E".to_string())
-    } else if input.trim() == g.trim() {
-        Ok("G".to_string())
-    } else if input.trim() == h.trim() {
-        Ok("H".to_string())
-    } else if input.trim() == j.trim() {
-        Ok("J".to_string())
-    } else if input.trim() == k.trim() {
-        Ok("K".to_string())
-    } else if input.trim() == l.trim() {
-        Ok("L".to_string())
-    } else if input.trim() == o.trim() {
-        Ok("O".to_string())
-    } else if input.trim() == r.trim() {
-        Ok("R".to_string())
-    } else {
-        Err(AdventError::IncompleteProgram { missing: input.trim().to_string() })
-    }
+    parse(input.trim())
 }
 
 #[cfg(test)]

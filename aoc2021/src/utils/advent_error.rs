@@ -13,6 +13,11 @@ pub enum AdventError {
         expected: Vec<String>
     },
 
+    #[error("Program is incomplete, manual intervention required (missing piece: {missing:?})")]
+    IncompleteProgram {
+        missing: String,
+    },
+
     #[error(transparent)]
     IO(#[from] std::io::Error),
 

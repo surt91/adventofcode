@@ -1,8 +1,10 @@
 use std::{fs, str::FromStr};
 
+use itertools::Itertools;
+
 use crate::utils::AdventError;
 
-pub fn run() -> (usize, usize) {
+pub fn run() -> (usize, String) {
     let input = fs::read_to_string("data/day13a.dat").expect("input file does not exist");
     let (points, folds) = parse(&input).expect("invalid input");
 
@@ -84,7 +86,7 @@ fn fold_once(points: &[Point], f: &Fold) -> usize {
     paper.iter().flatten().filter(|&&x| x).count()
 }
 
-fn print_code(points: &[Point], folds: &[Fold]) -> usize {
+fn print_code(points: &[Point], folds: &[Fold]) -> String {
     let x_max = points.iter().map(|p| p.x).max().unwrap();
     let y_max = points.iter().map(|p| p.y).max().unwrap();
 
@@ -97,9 +99,22 @@ fn print_code(points: &[Point], folds: &[Fold]) -> usize {
         paper = fold(&paper, f);
     }
 
-    print_paper(&paper);
+    // print_paper(&paper);
 
-    paper.iter().flatten().filter(|&&x| x).count()
+    let s = paper.iter().map(|row| {
+        row.iter().map(|&p| {
+            if p {"#"} else {" "}
+        }).join("")
+    }).map(|line| line.trim_end().to_string())
+    .join("\n");
+
+    let sol = s.split("\n\n")
+        .map(recognize_letter)
+        .collect::<Result<_,_>>();
+    match sol {
+        Ok(solution) => solution,
+        Err(_) => {print_paper(&paper); "# parsing failed".to_string()}
+    }
 }
 
 fn fold(paper: &[Vec<bool>], fold: &Fold) -> Vec<Vec<bool>> {
@@ -139,6 +154,86 @@ fn print_paper(paper: &[Vec<bool>]) {
     }
 }
 
+fn recognize_letter(input: &str) -> Result<String, AdventError> {
+let h =
+r"
+######
+  #
+  #
+######
+";
+let o =
+"
+#####
+#   #
+#   #
+#   #
+#####
+";
+let g =
+"
+ ####
+#    #
+#  # #
+ # ###
+";
+let a =
+"
+ #####
+#  #
+#  #
+ #####
+";
+let j =
+"
+    #
+     #
+#    #
+#####
+";
+let b =
+"
+######
+# #  #
+# #  #
+ # ##
+";
+let e =
+"
+######
+# #  #
+# #  #
+#    #
+";
+let c =
+"
+ ####
+#    #
+#    #
+ #  #
+";
+
+    if input.trim() == h.trim() {
+        Ok("H".to_string())
+    } else if input.trim() == o.trim() {
+        Ok("O".to_string())
+    } else if input.trim() == g.trim() {
+        Ok("G".to_string())
+    } else if input.trim() == a.trim() {
+        Ok("A".to_string())
+    } else if input.trim() == j.trim() {
+        Ok("J".to_string())
+    } else if input.trim() == b.trim() {
+        Ok("B".to_string())
+    } else if input.trim() == e.trim() {
+        Ok("E".to_string())
+    } else if input.trim() == c.trim() {
+        Ok("C".to_string())
+    } else {
+        Err(AdventError::IncompleteProgram { missing: input.trim().to_string() })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -172,6 +267,6 @@ mod tests {
         let (points, folds) = parse(input).expect("invalid input");
 
         assert_eq!(fold_once(&points, &folds[0]), 17);
-        assert_eq!(print_code(&points, &folds), 16);
+        assert_eq!(print_code(&points, &folds), "O".to_string());
     }
 }

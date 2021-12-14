@@ -1,4 +1,4 @@
-use std::{fs, str::FromStr};
+use std::{fs, str::FromStr, collections::HashSet};
 
 use itertools::Itertools;
 
@@ -19,6 +19,7 @@ enum Fold {
     Y(usize)
 }
 
+#[derive(PartialEq, Eq, Hash, Clone)]
 struct Point {
     x: usize,
     y: usize
@@ -73,85 +74,84 @@ fn parse(input: &str) -> Result<(Vec<Point>, Vec<Fold>), AdventError> {
 }
 
 fn fold_once(points: &[Point], f: &Fold) -> usize {
-    let x_max = points.iter().map(|p| p.x).max().unwrap();
-    let y_max = points.iter().map(|p| p.y).max().unwrap();
+    let mut points = points.iter().cloned().collect();
+    points = fold(&points, f);
 
-    let mut paper = vec![vec![false; y_max+1]; x_max+1];
-    for p in points {
-        paper[p.x][p.y] = true;
-    }
-
-    paper = fold(&paper, f);
-
-    paper.iter().flatten().filter(|&&x| x).count()
+    points.len()
 }
 
 fn print_code(points: &[Point], folds: &[Fold]) -> String {
-    let x_max = points.iter().map(|p| p.x).max().unwrap();
-    let y_max = points.iter().map(|p| p.y).max().unwrap();
-
-    let mut paper = vec![vec![false; y_max+1]; x_max+1];
-    for p in points {
-        paper[p.x][p.y] = true;
-    }
-
+    let mut points = points.iter().cloned().collect();
     for f in folds {
-        paper = fold(&paper, f);
+        points = fold(&points, f);
     }
 
-    // print_paper(&paper);
+    let paper = draw_points_on_paper(&points);
 
-    let s = paper.iter().map(|row| {
-        row.iter().map(|&p| {
-            if p {"#"} else {" "}
-        }).join("")
-    }).map(|line| line.trim_end().to_string())
-    .join("\n");
-
-    let sol = s.split("\n\n")
+    let sol = paper.split("\n\n")
         .map(recognize_letter)
         .collect::<Result<_,_>>();
     match sol {
         Ok(solution) => solution,
-        Err(_) => {print_paper(&paper); "# parsing failed".to_string()}
+        Err(_) => {println!("{}", draw_points_on_paper_transposed(&points)); "# parsing failed".to_string()}
     }
 }
 
-fn fold(paper: &[Vec<bool>], fold: &Fold) -> Vec<Vec<bool>> {
-    let x_max = paper.len() - 1;
-    let y_max = paper[0].len() - 1;
-
-    match fold {
-        Fold::Y(y_fold) => {
-            let mut paper_out = vec![vec![false; *y_fold]; x_max+1];
-            for x in 0..=x_max {
-                assert!(!paper[x][*y_fold]);
-                for y in 0..*y_fold {
-                    paper_out[x][y] = paper[x][y] | paper[x][y_max-y];
+fn fold(points: &HashSet<Point>, fold: &Fold) -> HashSet<Point> {
+    points.iter().map(|&Point{x, y}| {
+        let (x, y) = match fold {
+            Fold::Y(y_fold) => {
+                assert!(y != *y_fold);
+                if y > *y_fold {
+                    (x, 2*y_fold-y)
+                } else {
+                    (x, y)
+                }
+            },
+            Fold::X(x_fold) => {
+                assert!(x != *x_fold);
+                if x > *x_fold {
+                    (2*x_fold-x, y)
+                } else {
+                    (x, y)
                 }
             }
-            paper_out
-        },
-        Fold::X(x_fold) => {
-            let mut paper_out = vec![vec![false; y_max+1]; *x_fold];
-            for y in 0..=y_max {
-                assert!(!paper[*x_fold][y]);
-                for x in 0..*x_fold {
-                    paper_out[x][y] = paper[x][y] | paper[x_max-x][y];
-                }
-            }
-            paper_out
-        }
-    }
+        };
+        Point {x, y}
+    }).collect()
 }
 
-fn print_paper(paper: &[Vec<bool>]) {
-    for row in paper.iter() {
-        for &p in row {
-            print!("{}", if p {"#"} else {" "});
-        }
-        println!()
+fn draw_points_on_paper(points: &HashSet<Point>) -> String {
+    let x_max = points.iter().map(|p| p.x).max().unwrap();
+    let y_max = points.iter().map(|p| p.y).max().unwrap();
+
+    let mut paper = vec![vec![false; y_max+1]; x_max+1];
+    for p in points {
+        paper[p.x][p.y] = true;
     }
+
+    paper_to_string(&paper)
+}
+
+fn draw_points_on_paper_transposed(points: &HashSet<Point>) -> String {
+    let x_max = points.iter().map(|p| p.x).max().unwrap();
+    let y_max = points.iter().map(|p| p.y).max().unwrap();
+
+    let mut paper = vec![vec![false; x_max+1]; y_max+1];
+    for p in points {
+        paper[p.y][p.x] = true;
+    }
+
+    paper_to_string(&paper)
+}
+
+fn paper_to_string(paper: &[Vec<bool>]) -> String {
+    paper.iter().map(|row| {
+        row.iter().map(|&p| {
+            if p {"#"} else {" "}
+        }).join("")
+    }).map(|line| line.trim_end().to_string())
+    .join("\n")
 }
 
 fn recognize_letter(input: &str) -> Result<String, AdventError> {

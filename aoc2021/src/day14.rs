@@ -1,44 +1,64 @@
 use std::{fs, str::FromStr, collections::HashMap};
 
+use itermore::IterMore;
 use itertools::Itertools;
 
 use crate::utils::AdventError;
 
-pub fn run() -> (isize, usize) {
+pub fn run() -> (isize, isize) {
     let input = fs::read_to_string("data/day14a.dat").expect("input file does not exist");
     let (template, rules) = parse(&input).expect("invalid input");
 
     (
         calculate(&template, &rules, 10),
-        0
+        calculate(&template, &rules, 40),
     )
 }
 
 fn calculate(template: &str, rules: &[Rule], iterations: usize) -> isize {
-    let mut result = template.chars().collect_vec();
+    let mut result: HashMap<(char, char), isize> = HashMap::new();
+
+    for pair in template.chars()
+        .windows()
+        .map(|w: [char; 2]| (w[0], w[1]))
+    {
+        *result.entry(pair).or_insert(0) += 1;
+    }
+
     let rule_map: HashMap<(char, char), char> = rules.iter()
         .map(|r| (r.pattern, r.insertion))
         .collect();
 
     for _ in 0..iterations {
-        let mut idx = 0;
-        while idx + 1 < result.len() {
-            let pattern = (result[idx], result[idx+1]);
-            let insertion = rule_map[&pattern];
-            result.insert(idx+1, insertion);
-            idx += 2
+        let to_insert = result.iter()
+            .map(|(&pair, &count)| {
+                let c = rule_map[&pair];
+                [
+                    ((pair.0, c), count),
+                    ((c, pair.1), count),
+                    (pair, -count),
+                ]
+            }).flatten()
+            .collect_vec();
+
+        for (pair, count) in to_insert {
+            *result.entry(pair).or_insert(0) += count;
         }
     }
 
-    let mut counter: HashMap<char, usize> = HashMap::new();
-    for c in result {
-        *counter.entry(c).or_insert(0) += 1;
+    let mut counter: HashMap<char, isize> = HashMap::new();
+    for ((c1, _c2), count) in result {
+        *counter.entry(c1).or_insert(0) += count;
+        // only count the first one, to avoid counting twice
+        // *counter.entry(_c2).or_insert(0) += count;
     }
+    // then insert the last element of the template (which is never the first element)
+    *counter.entry(template.chars().last().unwrap()).or_insert(0) += 1;
 
     let min = *counter.values().min().unwrap();
     let max = *counter.values().max().unwrap();
 
-    max as isize - min as isize
+    max - min
 }
 
 struct Rule {
@@ -117,5 +137,6 @@ mod tests {
         let (template, rules) = parse(input).expect("invalid input");
 
         assert_eq!(calculate(&template, &rules, 10), 1588);
+        assert_eq!(calculate(&template, &rules, 40), 2188189693529);
     }
 }

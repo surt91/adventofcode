@@ -212,23 +212,50 @@ let c =
 #    #
  #  #
 ";
+let l =
+"
+######
+     #
+     #
+     #
+";
+let k =
+"
+######
+  #
+ # ##
+#    #
+";
+let r =
+"
+######
+#  #
+#  ##
+ ##  #
+";
 
-    if input.trim() == h.trim() {
-        Ok("H".to_string())
-    } else if input.trim() == o.trim() {
-        Ok("O".to_string())
-    } else if input.trim() == g.trim() {
-        Ok("G".to_string())
-    } else if input.trim() == a.trim() {
+    if input.trim() == a.trim() {
         Ok("A".to_string())
-    } else if input.trim() == j.trim() {
-        Ok("J".to_string())
     } else if input.trim() == b.trim() {
         Ok("B".to_string())
-    } else if input.trim() == e.trim() {
-        Ok("E".to_string())
     } else if input.trim() == c.trim() {
         Ok("C".to_string())
+    } else if input.trim() == e.trim() {
+        Ok("E".to_string())
+    } else if input.trim() == g.trim() {
+        Ok("G".to_string())
+    } else if input.trim() == h.trim() {
+        Ok("H".to_string())
+    } else if input.trim() == j.trim() {
+        Ok("J".to_string())
+    } else if input.trim() == k.trim() {
+        Ok("K".to_string())
+    } else if input.trim() == l.trim() {
+        Ok("L".to_string())
+    } else if input.trim() == o.trim() {
+        Ok("O".to_string())
+    } else if input.trim() == r.trim() {
+        Ok("R".to_string())
     } else {
         Err(AdventError::IncompleteProgram { missing: input.trim().to_string() })
     }

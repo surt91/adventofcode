@@ -41,7 +41,7 @@ impl Map {
             for i in 0..5usize {
                 for y in 0..self.height {
                     for x in 0..self.width {
-                        values[y+j*self.width][x+i*self.width] = wrap(self.values[y][x] + (i+j) as u8);
+                        values[y+j*self.height][x+i*self.width] = wrap(self.values[y][x] + (i+j) as u8);
                     }
                 }
             }

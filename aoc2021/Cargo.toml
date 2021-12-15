@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 itermore = "0.1.0"
 itertools = "0.10.1"
+priority-queue = "1.2.1"
 
 thiserror = "1.0.30"
 colored = "2.0.0"

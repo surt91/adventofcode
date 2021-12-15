@@ -30,12 +30,75 @@ pub fn parse(input: &str) -> Result<String, AdventError> {
     }
 }
 
+const A: &str =
+"
+ #####
+#  #
+#  #
+ #####
+";
+const B: &str =
+"
+######
+# #  #
+# #  #
+ # ##
+";
+const C: &str =
+"
+ ####
+#    #
+#    #
+ #  #
+";
+const E: &str =
+"
+######
+# #  #
+# #  #
+#    #
+";
+const F: &str =
+"
+######
+# #
+# #
+#
+";
+const G: &str =
+"
+ ####
+#    #
+#  # #
+ # ###
+";
 const H: &str =
 r"
 ######
   #
   #
 ######
+";
+const J: &str =
+"
+    #
+     #
+#    #
+#####
+";
+const K: &str =
+"
+######
+  #
+ # ##
+#    #
+";
+const L: &str =
+"
+######
+     #
+     #
+     #
 ";
 const O: &str =
 "
@@ -45,73 +108,10 @@ const O: &str =
 #   #
 #####
 ";
-const G: &str =
-"
- ####
-#    #
-#  # #
- # ###
-";
-const A: &str =
-"
- #####
-#  #
-#  #
- #####
-";
-const J: &str =
-"
-    #
-     #
-#    #
-#####
-";
-const B: &str =
-"
-######
-# #  #
-# #  #
- # ##
-";
-const E: &str =
-"
-######
-# #  #
-# #  #
-#    #
-";
-const C: &str =
-"
- ####
-#    #
-#    #
- #  #
-";
-const L: &str =
-"
-######
-     #
-     #
-     #
-";
-const K: &str =
-"
-######
-  #
- # ##
-#    #
-";
 const R: &str =
 "
 ######
 #  #
 #  ##
  ##  #
-";
-const F: &str =
-"
-######
-# #
-# #
-#
 ";

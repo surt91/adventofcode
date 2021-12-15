@@ -23,8 +23,14 @@ pub fn parse(input: &str) -> Result<String, AdventError> {
         Ok("L".to_string())
     } else if input.trim() == O.trim() {
         Ok("O".to_string())
+    } else if input.trim() == P.trim() {
+        Ok("P".to_string())
     } else if input.trim() == R.trim() {
         Ok("R".to_string())
+    } else if input.trim() == U.trim() {
+        Ok("U".to_string())
+    } else if input.trim() == Z.trim() {
+        Ok("Z".to_string())
     } else {
         Err(AdventError::IncompleteProgram { missing: input.trim().to_string() })
     }
@@ -108,10 +114,31 @@ const O: &str =
 #   #
 #####
 ";
+const P: &str =
+"
+######
+#  #
+#  #
+ ##
+";
 const R: &str =
 "
 ######
 #  #
 #  ##
  ##  #
+";
+const U: &str =
+"
+#####
+     #
+     #
+#####
+";
+const Z: &str =
+"
+#   ##
+#  # #
+# #  #
+##   #
 ";

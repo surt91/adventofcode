@@ -6,7 +6,7 @@ use super::AdventError;
 pub struct Map {
     pub width: usize,
     pub height: usize,
-    values: Vec<Vec<u8>>
+    pub values: Vec<Vec<u8>>
 }
 
 impl Map {

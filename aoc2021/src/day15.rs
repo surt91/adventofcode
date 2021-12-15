@@ -10,7 +10,7 @@ pub fn run() -> (usize, usize) {
 
     (
         map.lowest_risk(),
-        0
+        map.expand().lowest_risk()
     )
 }
 
@@ -21,9 +21,37 @@ impl Map {
 
         let shortest = self.astar(start, end);
 
-        println!("{:?}", shortest);
-
         shortest.iter().rev().skip(1).map(|p| self[*p] as usize).sum()
+    }
+
+    fn expand(&self) -> Map {
+        let width = 5*self.width;
+        let height = 5*self.height;
+
+        fn wrap(v: u8) -> u8 {
+            if v > 9 {
+                v-9
+            } else {
+                v
+            }
+        }
+
+        let mut values = vec![vec![0; width]; height];
+        for j in 0..5usize {
+            for i in 0..5usize {
+                for y in 0..self.height {
+                    for x in 0..self.width {
+                        values[y+j*self.width][x+i*self.width] = wrap(self.values[y][x] + (i+j) as u8);
+                    }
+                }
+            }
+        }
+
+        Map {
+            width,
+            height,
+            values
+        }
     }
 
     fn astar(&self, start: (usize, usize), end: (usize, usize)) -> Vec<(usize, usize)> {
@@ -93,5 +121,6 @@ mod tests {
         let map: Map = input.parse().expect("invalid input");
 
         assert_eq!(map.lowest_risk(), 40);
+        assert_eq!(map.expand().lowest_risk(), 315);
     }
 }

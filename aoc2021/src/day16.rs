@@ -10,18 +10,37 @@ pub fn run() -> (usize, usize) {
 
     (
         bits.sum_versions(),
-        0
+        bits.eval(),
     )
 }
 
 enum PacketPayload {
     Value(usize),
-    Operator(char, Vec<Packet>)
+    Operator(u8, Vec<Packet>)
+}
+
+impl PacketPayload {
+    fn eval(&self) -> usize {
+        match self {
+            Self::Value(val) => *val,
+            Self::Operator(op, operands) => {
+                match op {
+                    0 => operands.iter().map(|o| o.eval()).sum(),
+                    1 => operands.iter().map(|o| o.eval()).product(),
+                    2 => operands.iter().map(|o| o.eval()).min().unwrap(),
+                    3 => operands.iter().map(|o| o.eval()).max().unwrap(),
+                    5 => if operands[0].eval() > operands[1].eval() {1} else {0},
+                    6 => if operands[0].eval() < operands[1].eval() {1} else {0},
+                    7 => if operands[0].eval() == operands[1].eval() {1} else {0},
+                    _ => unreachable!()
+                }
+            }
+        }
+    }
 }
 
 struct Packet {
     version: u8,
-    packet_type: u8,
     payload: PacketPayload
 }
 
@@ -57,12 +76,11 @@ impl PacketParser {
 
         let payload = match packet_type {
             4 => self.parse_value_payload()?,
-            _ => self.parse_operator_payload()?
+            op => self.parse_operator_payload(op)?
         };
 
         Ok(Packet {
             version,
-            packet_type,
             payload
         })
     }
@@ -84,7 +102,7 @@ impl PacketParser {
         Ok(PacketPayload::Value(value))
     }
 
-    fn parse_operator_payload(&mut self) -> Result<PacketPayload, AdventError> {
+    fn parse_operator_payload(&mut self, op: u8) -> Result<PacketPayload, AdventError> {
         let len_type = self.binary[self.idx];
         self.idx += 1;
 
@@ -114,7 +132,8 @@ impl PacketParser {
             },
             e => return Err(AdventError::UnexpectedElement { found: e.to_string(), expected: vec!["0".to_string(), "1".to_string()] })
         };
-        Ok(PacketPayload::Operator('x', packets))
+
+        Ok(PacketPayload::Operator(op, packets))
     }
 }
 
@@ -127,6 +146,9 @@ impl Packet {
         sum
     }
 
+    fn eval(&self) -> usize {
+        self.payload.eval()
+    }
 }
 
 impl FromStr for Packet {
@@ -171,5 +193,37 @@ mod tests {
         let input = "A0016C880162017C3686B18A3D4780";
         let bits: Packet = input.parse().expect("invalid input");
         assert_eq!(bits.sum_versions(), 31);
+
+        let input = "C200B40A82";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 3);
+
+        let input = "04005AC33890";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 54);
+
+        let input = "880086C3E88112";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 7);
+
+        let input = "CE00C43D881120";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 9);
+
+        let input = "D8005AC2A8F0";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 1);
+
+        let input = "F600BC2D8F";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 0);
+
+        let input = "9C005AC2F8F0";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 0);
+
+        let input = "9C0141080250320F1802104A08";
+        let bits: Packet = input.parse().expect("invalid input");
+        assert_eq!(bits.eval(), 1);
     }
 }

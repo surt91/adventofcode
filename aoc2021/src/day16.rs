@@ -115,7 +115,6 @@ impl PacketParser {
                 self.idx += 15;
                 let limit = self.idx + len;
 
-
                 while self.idx < limit {
                     packets.push(self.parse()?);
                 }
@@ -125,12 +124,11 @@ impl PacketParser {
                 let len = usize::from_str_radix(&self.binary[self.idx..self.idx+11].iter().join(""), 2)?;
                 self.idx += 11;
 
-
                 for _ in 0..len {
                     packets.push(self.parse()?);
                 }
             },
-            e => return Err(AdventError::UnexpectedElement { found: e.to_string(), expected: vec!["0".to_string(), "1".to_string()] })
+            e => return Err(AdventError::UnexpectedElement { found: e.to_string(), expected: &["0", "1"] })
         };
 
         Ok(PacketPayload::Operator(op, packets))

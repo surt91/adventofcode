@@ -10,7 +10,7 @@ pub enum AdventError {
     #[error("Input line contains unexpected Element (expected one of {expected:?}, found {found:?})")]
     UnexpectedElement {
         found: String,
-        expected: Vec<String>
+        expected: &'static [&'static str]
     },
 
     #[error("Program is incomplete, manual intervention required (missing piece: {missing:?})")]

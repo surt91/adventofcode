@@ -77,7 +77,10 @@ impl FromStr for Map
                     c.to_digit(10)
                     .map(|x| x as u8)
                     .ok_or(
-                        AdventError::UnexpectedElement{found: c.to_string(), expected: vec!["a number".to_string()]})
+                        AdventError::UnexpectedElement{
+                            found: c.to_string(),
+                            expected: &["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+                        })
                     ).collect::<Result<_, _>>()
                 ).collect::<Result<_, _>>()?;
 

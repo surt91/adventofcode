@@ -60,7 +60,7 @@ fn parse(input: &[String]) -> Result<Vec<Direction>, AdventError> {
                 "down" => Ok(Direction::Down(magnitude)),
                 _ => Err(AdventError::UnexpectedElement {
                     found: direction.to_string(),
-                    expected: vec!["forward".to_string(), "up".to_string(), "down".to_string()]
+                    expected: &["forward", "up", "down"]
                 })
             }
         } else {

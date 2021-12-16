@@ -36,7 +36,7 @@ impl FromStr for Fold {
         match axis {
             "x" => Ok(Fold::X(position)),
             "y" => Ok(Fold::Y(position)),
-            s => Err(AdventError::UnexpectedElement { found: s.to_string(), expected: vec!["x".to_string(), "y".to_string()] })
+            s => Err(AdventError::UnexpectedElement { found: s.to_string(), expected: &["x", "y"] })
         }
     }
 }

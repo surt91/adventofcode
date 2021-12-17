@@ -23,4 +23,7 @@ pub enum AdventError {
 
     #[error(transparent)]
     Parser(#[from] std::num::ParseIntError),
+
+    #[error(transparent)]
+    Scan(#[from] scan_fmt::parse::ScanError),
 }

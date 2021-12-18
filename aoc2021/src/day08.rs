@@ -34,8 +34,7 @@ pub fn run() -> (usize, usize) {
 
 fn num_1478(results: &[Line]) -> usize {
     results.iter()
-        .map(|ele| ele.1.clone())
-        .flatten()
+        .flat_map(|ele| ele.1.clone())
         .filter(|ele| matches!(ele.len(), 2|4|3|7))
         .count()
 }

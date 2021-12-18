@@ -1,9 +1,8 @@
 use std::{str::FromStr, fs, ops::{Add, AddAssign}, iter::Sum, fmt::Display, cmp};
 
-
 use itertools::Itertools;
 
-use crate::utils::{AdventError};
+use crate::utils::AdventError;
 
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day18a.dat").expect("invalid input");
@@ -30,6 +29,7 @@ struct SnailfishNumber {
     line: Vec<Element>
 }
 
+// this is a nightmare
 impl SnailfishNumber {
     fn new() -> Self {
         SnailfishNumber {
@@ -200,12 +200,13 @@ impl SnailfishNumber {
     }
 }
 
-impl Add for SnailfishNumber {
-    type Output = Self;
+impl Add for &SnailfishNumber {
+    type Output = SnailfishNumber;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let mut out = self;
-        out += rhs;
+        let mut out = self.clone();
+        out += rhs.clone();
+        out.reduce();
         out
     }
 }
@@ -242,7 +243,8 @@ impl FromStr for SnailfishNumber {
                 '[' => Some(Element::Open),
                 ']' => Some(Element::Close),
                 ',' | ' ' => None,
-                x => Some(Element::Number(x.to_string().parse().unwrap()))
+                n @ '0'..='9' => Some(Element::Number(n.to_string().parse().unwrap())),
+                _ => panic!("invalid input")
             }
         })
         .collect();
@@ -268,11 +270,7 @@ impl Display for SnailfishNumber {
 
 fn largest(numbers: &[SnailfishNumber]) -> usize {
     numbers.iter().combinations(2).map(|i| {
-        let mut a = i[0].clone() + i[1].clone();
-        a.reduce();
-        let mut b = i[1].clone() + i[0].clone();
-        b.reduce();
-        cmp::max(a.magnitude(), b.magnitude())
+        cmp::max((i[0] + i[1]).magnitude(), (i[1] + i[0]).magnitude())
     })
     .max().unwrap()
 }
@@ -282,7 +280,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example() {
+    fn explode() {
         let mut sn: SnailfishNumber = "[[[[[9,8],1],2],3],4]".parse().unwrap();
         let expected: SnailfishNumber = "[[[[0,9],2],3],4]".parse().unwrap();
         sn.explode();
@@ -303,7 +301,10 @@ mod tests {
         let expected: SnailfishNumber = "[[3,[2,[8,0]]],[9,[5,[7,0]]]]".parse().unwrap();
         sn.explode();
         assert_eq!(sn, expected);
+    }
 
+    #[test]
+    fn add_reduce() {
         let mut sn: SnailfishNumber = "[[[[4,3],4],4],[7,[[8,4],9]]]".parse().unwrap();
         let sn2: SnailfishNumber = "[1,1]".parse().unwrap();
         let expected: SnailfishNumber = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]".parse().unwrap();
@@ -320,8 +321,6 @@ mod tests {
             "[4,4]".parse::<SnailfishNumber>().unwrap(),
         ].into_iter().sum();
         let expected: SnailfishNumber = "[[[[1,1],[2,2]],[3,3]],[4,4]]".parse().unwrap();
-        println!("have: {}", sn);
-        println!("should: {}", expected);
         assert_eq!(sn, expected);
         let sn: SnailfishNumber = [
             "[1,1]".parse().unwrap(),
@@ -342,7 +341,10 @@ mod tests {
         ].into_iter().sum();
         let expected: SnailfishNumber = "[[[[5,0],[7,4]],[5,5]],[6,6]]".parse().unwrap();
         assert_eq!(sn, expected);
+    }
 
+    #[test]
+    fn magnitude() {
         let sn: SnailfishNumber = "[[1,2],[[3,4],5]]".parse().unwrap();
         assert_eq!(sn.magnitude(), 143);
         let sn: SnailfishNumber = " [[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap();
@@ -355,7 +357,10 @@ mod tests {
         assert_eq!(sn.magnitude(), 1137);
         let sn: SnailfishNumber = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]".parse().unwrap();
         assert_eq!(sn.magnitude(), 3488);
+    }
 
+    #[test]
+    fn example() {
         let input = r"
             [[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
             [[[5,[2,8]],4],[5,[[9,9],0]]]
@@ -374,10 +379,6 @@ mod tests {
             .expect("invalid input");
         let expected: SnailfishNumber = "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]".parse().unwrap();
         let sum = s.iter().cloned().sum::<SnailfishNumber>();
-
-        println!("s {:?}", sum);
-        println!("sum {}", sum);
-        println!("expected {}", expected);
 
         assert_eq!(sum, expected);
         assert_eq!(sum.magnitude(), 4140);

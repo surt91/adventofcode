@@ -31,14 +31,14 @@ fn calculate(template: &str, rules: &[Rule], iterations: usize) -> isize {
 
     for _ in 0..iterations {
         let to_insert = result.iter()
-            .map(|(&pair, &count)| {
+            .flat_map(|(&pair, &count)| {
                 let c = rule_map[&pair];
                 [
                     ((pair.0, c), count),
                     ((c, pair.1), count),
                     (pair, -count),
                 ]
-            }).flatten()
+            })
             .collect_vec();
 
         for (pair, count) in to_insert {

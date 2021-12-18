@@ -1,5 +1,7 @@
-use std::{str::FromStr, fs, ops::{Add, AddAssign}, iter::Sum, fmt::Display};
+use std::{str::FromStr, fs, ops::{Add, AddAssign}, iter::Sum, fmt::Display, cmp};
 
+
+use itertools::Itertools;
 
 use crate::utils::{AdventError};
 
@@ -11,8 +13,8 @@ pub fn run() -> (usize, usize) {
         .expect("invalid input");
 
     (
-        g.into_iter().sum::<SnailfishNumber>().magnitude(),
-        0,
+        g.iter().cloned().sum::<SnailfishNumber>().magnitude(),
+        largest(&g),
     )
 }
 
@@ -23,7 +25,7 @@ enum Element {
     Number(u8)
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct SnailfishNumber {
     line: Vec<Element>
 }
@@ -38,8 +40,6 @@ impl SnailfishNumber {
     fn split(&mut self) -> bool {
         let mut idx = 0usize;
 
-        // println!("before s: {:}", self);
-
         while idx < self.line.len() {
             match self.line[idx] {
                 Element::Number(x) if x > 9 => {
@@ -49,8 +49,6 @@ impl SnailfishNumber {
                     self.line.insert(idx, Element::Number(right));
                     self.line.insert(idx, Element::Number(left));
                     self.line.insert(idx, Element::Open);
-
-                    // println!("split at {}: {}", x, self);
 
                     return true
                 }
@@ -64,7 +62,6 @@ impl SnailfishNumber {
     fn explode(&mut self) -> bool {
         let mut idx = 0usize;
         let mut depth = 0;
-        // println!("before: {:}", self);
 
         while idx < self.line.len() {
             match self.line[idx] {
@@ -75,7 +72,6 @@ impl SnailfishNumber {
                         let left_idx = self.find_left(idx);
                         let right_idx = self.find_right(idx+1);
 
-                        // println!("add to left: {:?}", left_idx);
                         if let Some(li) = left_idx {
                             if let Element::Number(lv) = self.line[li] {
                                 self.line[li] = Element::Number(lv + x)
@@ -84,12 +80,9 @@ impl SnailfishNumber {
                             }
                         }
 
-                        // println!("add to right: {:?}", right_idx);
                         if let Some(ri) = right_idx {
                             if let Element::Number(rv) = self.line[idx+1] {
-                                // println!("rv: {:?}", rv);
                                 if let Element::Number(y) = self.line[ri] {
-                                    // println!("y: {:?}", y);
                                     self.line[ri] = Element::Number(rv + y)
                                 } else {
                                     panic!("panic!")
@@ -97,13 +90,11 @@ impl SnailfishNumber {
                             }
                         }
 
-                        // remove [, x, y, ], insert 0
                         self.line[idx-1] = Element::Number(0);
                         self.line.remove(idx);
                         self.line.remove(idx);
                         self.line.remove(idx);
 
-                        // println!("exploded: {:}", self);
                         return true
                     }
                 }
@@ -136,14 +127,11 @@ impl SnailfishNumber {
     }
 
     fn reduce(&mut self) {
-        // println!("start: {:}", self);
         loop {
             if self.explode() {
-                // println!("exploded: {:}", self);
                 continue;
             }
             if self.split() {
-                // println!("split: {:}", self);
                 continue;
             }
             break
@@ -152,10 +140,8 @@ impl SnailfishNumber {
 
     fn magnitude(&self) -> usize {
 
-        println!("look at {}", self);
 
         if let Element::Number(x) = self.line[0] {
-            println!("found {}", x);
             return x as usize
         }
 
@@ -166,7 +152,6 @@ impl SnailfishNumber {
 
         let mut num_open = 0;
         let mut idx = left_start;
-
 
         loop {
             match self.line[idx] {
@@ -187,7 +172,6 @@ impl SnailfishNumber {
         }
 
         loop {
-            // println!("rest {:?}", self.line[idx..].to_vec());
             idx += 1;
             match self.line[idx] {
                 Element::Open => {
@@ -212,15 +196,22 @@ impl SnailfishNumber {
             line: self.line[right_start..=right_end].to_vec()
         };
 
-        println!("l {} ;  r {}", left, right);
-
         3*left.magnitude() + 2*right.magnitude()
+    }
+}
+
+impl Add for SnailfishNumber {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let mut out = self;
+        out += rhs;
+        out
     }
 }
 
 impl AddAssign for SnailfishNumber {
     fn add_assign(&mut self, rhs: Self) {
-        // println!("before add: {}", self);
         let not_new = !self.line.is_empty();
         self.line.extend(rhs.line);
 
@@ -228,7 +219,6 @@ impl AddAssign for SnailfishNumber {
             self.line.insert(0, Element::Open);
             self.line.push(Element::Close);
         }
-        // println!("after add: {}", self);
     }
 }
 
@@ -247,14 +237,14 @@ impl FromStr for SnailfishNumber {
     type Err = AdventError;
 
     fn from_str(input: &str) -> Result<Self, AdventError> {
-        let line = input.trim().chars().map(|c| {
+        let line = input.trim().chars().filter_map(|c| {
             match c {
                 '[' => Some(Element::Open),
                 ']' => Some(Element::Close),
                 ',' | ' ' => None,
                 x => Some(Element::Number(x.to_string().parse().unwrap()))
             }
-        }).flatten()
+        })
         .collect();
 
         Ok(SnailfishNumber {
@@ -274,6 +264,17 @@ impl Display for SnailfishNumber {
         }
         Ok(())
     }
+}
+
+fn largest(numbers: &[SnailfishNumber]) -> usize {
+    numbers.iter().combinations(2).map(|i| {
+        let mut a = i[0].clone() + i[1].clone();
+        a.reduce();
+        let mut b = i[1].clone() + i[0].clone();
+        b.reduce();
+        cmp::max(a.magnitude(), b.magnitude())
+    })
+    .max().unwrap()
 }
 
 #[cfg(test)]
@@ -372,7 +373,7 @@ mod tests {
             .collect::<Result<_, _>>()
             .expect("invalid input");
         let expected: SnailfishNumber = "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]".parse().unwrap();
-        let sum = s.into_iter().sum::<SnailfishNumber>();
+        let sum = s.iter().cloned().sum::<SnailfishNumber>();
 
         println!("s {:?}", sum);
         println!("sum {}", sum);
@@ -380,5 +381,6 @@ mod tests {
 
         assert_eq!(sum, expected);
         assert_eq!(sum.magnitude(), 4140);
+        assert_eq!(largest(&s), 3993);
     }
 }

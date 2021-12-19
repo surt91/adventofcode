@@ -135,7 +135,6 @@ impl Scanner {
         out
     }
 
-    // I am sure I could avoid some of the clones, but it works (but not very fast)
     fn overlap(&self, other: &Scanner) -> Option<Scanner> {
         for o in other.all_orientations() {
             for j in &o {
@@ -143,8 +142,8 @@ impl Scanner {
                     let delta = i - j;
                     // shift by the delta of all pairs
                     // and look if there are >= 12 overlapping
-                    let matches = self.beacons.iter().cloned().flat_map(|b| {
-                        let shifted = b - delta.clone();
+                    let matches = self.beacons.iter().flat_map(|b| {
+                        let shifted = b - &delta;
                         o.iter().cloned().map(move |a| {
                             shifted.clone() - a
                         })

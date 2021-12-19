@@ -103,6 +103,15 @@ mod tests {
     use super::*;
 
     #[test]
+    fn completion() {
+        assert_eq!(completion_score("}}]])})]"), 288957);
+        assert_eq!(completion_score(")}>]})"), 5566);
+        assert_eq!(completion_score("}}>}>))))"), 1480781);
+        assert_eq!(completion_score("]]}}]}]}>"), 995444);
+        assert_eq!(completion_score("])}>"), 294);
+    }
+
+    #[test]
     fn example() {
         let input = r"
             [({(<(())[]>[[{[]{<()<>>
@@ -120,13 +129,6 @@ mod tests {
         let lines = split_lines(input);
 
         assert_eq!(score(&lines), 26397);
-
-        assert_eq!(completion_score("}}]])})]"), 288957);
-        assert_eq!(completion_score(")}>]})"), 5566);
-        assert_eq!(completion_score("}}>}>))))"), 1480781);
-        assert_eq!(completion_score("]]}}]}]}>"), 995444);
-        assert_eq!(completion_score("])}>"), 294);
-
         assert_eq!(middle_score(&lines), 288957);
     }
 }

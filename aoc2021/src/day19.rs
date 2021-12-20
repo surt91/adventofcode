@@ -2,6 +2,7 @@ use std::{collections::HashSet, fs, str::FromStr, ops::{Sub, Add}};
 
 use itertools::{Itertools, iproduct};
 use scan_fmt::scan_fmt;
+use rayon::prelude::*;
 
 use crate::utils::AdventError;
 
@@ -136,8 +137,8 @@ impl Scanner {
     }
 
     fn overlap(&self, other: &Scanner) -> Option<Scanner> {
-        for o in other.all_orientations() {
-            for j in &o {
+        other.all_orientations().par_iter().map(|o| {
+            for j in o {
                 for i in &self.beacons {
                     let delta = i - j;
                     // shift by the delta of all pairs
@@ -163,9 +164,10 @@ impl Scanner {
                     }
                 }
             }
-        }
-
-        None
+            None
+        })
+        .flatten()
+        .find_any(|_| true)
     }
 }
 

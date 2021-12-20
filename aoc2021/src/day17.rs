@@ -29,8 +29,7 @@ impl TargetZone {
         let vy_max: isize = -self.y_min;
 
         (0..vx_max).cartesian_product(vy_min..vy_max)
-            .map(|(vx, vy)| self.test(vx, vy))
-            .flatten()
+            .filter_map(|(vx, vy)| self.test(vx, vy))
             .max()
             .unwrap()
     }
@@ -41,8 +40,7 @@ impl TargetZone {
         let vy_max: isize = cmp::max(self.y_max, self.y_min.abs());
 
         (0..=vx_max).cartesian_product(vy_min..=vy_max)
-            .map(|(vx, vy)| self.test(vx, vy))
-            .flatten()
+            .filter_map(|(vx, vy)| self.test(vx, vy))
             .count()
     }
 

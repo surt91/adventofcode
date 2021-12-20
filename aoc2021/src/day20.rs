@@ -1,6 +1,7 @@
-use std::{fs};
+use std::fs;
 
 use itertools::Itertools;
+use rayon::prelude::*;
 
 use crate::utils::{Map, AdventError};
 
@@ -8,33 +9,13 @@ pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day20a.dat").expect("input file does not exist");
     let (rules, image) = parse(&input).expect("invalid input");
 
-    let default = 0;
-    let mut image = image.enhance(&rules, default);
-    let default = image[(0,0)];
-    image = image.enhance(&rules, default);
-    let enhanced_twice = image.count_light();
-
-    for _ in 0..48 {
-        let default = image[(0,0)];
-        image = image.enhance(&rules, default);
-    }
-
     (
-        enhanced_twice,
-        image.count_light(),
+        image.multi_enhance(&rules, 2).count_light(),
+        image.multi_enhance(&rules, 50).count_light(),
     )
 }
 
 impl Map {
-    fn new(width: usize, height: usize) -> Map {
-        let values = vec![vec![0; width]; height];
-        Map {
-            width,
-            height,
-            values
-        }
-    }
-
     fn get(&self, x: isize, y: isize) -> Option<u8> {
         if x < 0 || x >= self.width as isize || y < 0 || y >= self.height as isize {
             None
@@ -53,24 +34,38 @@ impl Map {
             }
         }
 
+        // TODO: use bits instead of string conversion
         let binary = out.iter().map(|&v| if v > 0 {'1'} else {'0'}).join("");
         usize::from_str_radix(&binary, 2).unwrap()
     }
 
     fn enhance(&self, rules: &[u8], default: u8) -> Map {
-        let width = self.width+6;
-        let height = self.height+6;
-        let mut out = Map::new(width, height);
+        let width = self.width+2;
+        let height = self.height+2;
 
-        for j in 0..height {
-            for i in 0..width {
-                let idx = self.block((i as isize - 3, j as isize - 3), default);
-                let p = rules[idx];
-                out[(i, j)] = p;
-            }
+        let values = (0..height).into_par_iter().map(|j| {
+            (0..width).map(|i| {
+                let idx = self.block((i as isize - 1, j as isize - 1), default);
+                rules[idx]
+            }).collect()
+        }).collect();
+
+        Map {
+            width,
+            height,
+            values
+        }
+    }
+
+    fn multi_enhance(&self, rules: &[u8], n: usize) -> Map {
+        let default = 0;
+        let mut image = self.enhance(rules, default);
+        for _ in 0..n-1 {
+            let default = image[(0,0)];
+            image = image.enhance(rules, default);
         }
 
-        out
+        image
     }
 
     fn count_light(&self) -> usize {
@@ -124,18 +119,7 @@ mod tests {
 
         let (rules, image) = parse(input).expect("invalid input");
 
-        let default = 0;
-        let mut image = image.enhance(&rules, default);
-        let default = image[(0,0)];
-        image = image.enhance(&rules, default);
-
-        assert_eq!(image.count_light(), 35);
-
-        for _ in 0..48 {
-            let default = image[(0,0)];
-            image = image.enhance(&rules, default);
-        }
-
-        assert_eq!(image.count_light(), 3351);
+        assert_eq!(image.multi_enhance(&rules, 2).count_light(), 35);
+        assert_eq!(image.multi_enhance(&rules, 50).count_light(), 3351);
     }
 }

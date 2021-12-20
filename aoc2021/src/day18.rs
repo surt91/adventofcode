@@ -127,20 +127,10 @@ impl SnailfishNumber {
     }
 
     fn reduce(&mut self) {
-        loop {
-            if self.explode() {
-                continue;
-            }
-            if self.split() {
-                continue;
-            }
-            break
-        }
+        while self.explode() || self.split() {}
     }
 
     fn magnitude(&self) -> usize {
-
-
         if let Element::Number(x) = self.line[0] {
             return x as usize
         }

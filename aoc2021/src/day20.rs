@@ -1,9 +1,8 @@
 use std::fs;
 
-use itertools::Itertools;
 use rayon::prelude::*;
 
-use crate::utils::{Map, AdventError};
+use crate::utils::{Map, AdventError, binary};
 
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day20a.dat").expect("input file does not exist");
@@ -34,9 +33,7 @@ impl Map {
             }
         }
 
-        // TODO: use bits instead of string conversion
-        let binary = out.iter().map(|&v| if v > 0 {'1'} else {'0'}).join("");
-        usize::from_str_radix(&binary, 2).unwrap()
+        binary::to_usize(&out)
     }
 
     fn enhance(&self, rules: &[u8], default: u8) -> Map {

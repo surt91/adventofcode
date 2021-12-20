@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
 
-use crate::utils::read_lines;
+use crate::utils::{read_lines, binary};
 
-pub fn run() -> (i64, i64) {
+pub fn run() -> (usize, usize) {
     let diagnostics = read_lines("data/day03a.dat");
 
     (
@@ -11,7 +11,7 @@ pub fn run() -> (i64, i64) {
     )
 }
 
-fn power_consumption(diagnostics: &[String]) -> i64 {
+fn power_consumption(diagnostics: &[String]) -> usize {
     gamma(diagnostics) * epsilon(diagnostics)
 }
 
@@ -22,11 +22,6 @@ fn strings_to_vec(strings: &[String]) -> Vec<Vec<u8>> {
                 .unwrap() as u8
             ).collect()
     ).collect()
-}
-
-fn vec_to_int(vec: &[u8]) -> i64 {
-    let bin: String = vec.iter().map(|c| format!("{}", c)).collect();
-    i64::from_str_radix(&bin, 2).unwrap()
 }
 
 fn binary(lines: &[Vec<u8>], tiebreaker: u8) -> Vec<u8> {
@@ -46,13 +41,13 @@ fn binary(lines: &[Vec<u8>], tiebreaker: u8) -> Vec<u8> {
     }).collect()
 }
 
-fn gamma(lines: &[String]) -> i64 {
+fn gamma(lines: &[String]) -> usize {
     let data = strings_to_vec(lines);
     let bin = binary(&data, 1);
-    vec_to_int(&bin)
+    binary::to_usize(&bin)
 }
 
-fn epsilon(lines: &[String]) -> i64 {
+fn epsilon(lines: &[String]) -> usize {
     let data = strings_to_vec(lines);
     let bin = binary(&data, 1);
 
@@ -60,7 +55,7 @@ fn epsilon(lines: &[String]) -> i64 {
         .map(|&i| if i == 0 { 1 } else { 0 })
         .collect();
 
-    vec_to_int(&inverted)
+    binary::to_usize(&inverted)
 }
 
 fn criteria(lines: &[String], most: bool) -> Vec<u8> {
@@ -87,17 +82,17 @@ fn criteria(lines: &[String], most: bool) -> Vec<u8> {
     }
 }
 
-fn oxygen(lines: &[String]) -> i64 {
+fn oxygen(lines: &[String]) -> usize {
     let sol = criteria(lines, true);
-    vec_to_int(&sol)
+    binary::to_usize(&sol)
 }
 
-fn co2(lines: &[String]) -> i64 {
+fn co2(lines: &[String]) -> usize {
     let sol = criteria(lines, false);
-    vec_to_int(&sol)
+    binary::to_usize(&sol)
 }
 
-fn life_support(lines: &[String]) -> i64 {
+fn life_support(lines: &[String]) -> usize {
     oxygen(lines) * co2(lines)
 }
 

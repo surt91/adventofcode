@@ -2,7 +2,7 @@ use std::{fs, str::FromStr};
 
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::utils::{AdventError, binary};
 
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day16a.dat").expect("input file does not exist");
@@ -45,7 +45,7 @@ struct Packet {
 }
 
 struct PacketParser {
-    binary: Vec<char>,
+    binary: Vec<u8>,
     idx: usize
 }
 
@@ -57,6 +57,7 @@ impl PacketParser {
         }).collect::<Result<Vec<_>, _>>()?
         .iter()
         .flat_map(|s| s.chars())
+        .map(|c| if c == '0' {0} else {1})
         .collect_vec();
 
         Ok(PacketParser {
@@ -66,13 +67,13 @@ impl PacketParser {
     }
 
     fn parse(&mut self) -> Result<Packet, AdventError> {
-        let version = self.binary[self.idx..self.idx+3].iter().join("");
+        let version = &self.binary[self.idx..self.idx+3];
         self.idx += 3;
-        let version = u8::from_str_radix(&version, 2)?;
+        let version = binary::to_u8(version);
 
-        let packet_type = self.binary[self.idx..self.idx+3].iter().join("");
+        let packet_type = &self.binary[self.idx..self.idx+3];
         self.idx += 3;
-        let packet_type = u8::from_str_radix(&packet_type, 2)?;
+        let packet_type = binary::to_u8(packet_type);
 
         let payload = match packet_type {
             4 => self.parse_value_payload()?,
@@ -86,10 +87,10 @@ impl PacketParser {
     }
 
     fn parse_value_payload(&mut self) -> Result<PacketPayload, AdventError> {
-        let mut number: Vec<char> = Vec::new();
+        let mut number: Vec<u8> = Vec::new();
 
         loop {
-            let cont_flag = self.binary[self.idx] == '0';
+            let cont_flag = self.binary[self.idx] == 0;
             let part = &self.binary[self.idx+1..self.idx+5];
             self.idx += 5;
 
@@ -98,7 +99,7 @@ impl PacketParser {
                 break;
             }
         }
-        let value = usize::from_str_radix(&number.iter().join(""), 2)?;
+        let value = binary::to_usize(&number);
         Ok(PacketPayload::Value(value))
     }
 
@@ -109,7 +110,7 @@ impl PacketParser {
         let mut packets = Vec::new();
 
         match len_type {
-            '0' => {
+            0 => {
                 // len is bits
                 let len = usize::from_str_radix(&self.binary[self.idx..self.idx+15].iter().join(""), 2)?;
                 self.idx += 15;
@@ -119,7 +120,7 @@ impl PacketParser {
                     packets.push(self.parse()?);
                 }
             },
-            '1' => {
+            1 => {
                 // len is packets
                 let len = usize::from_str_radix(&self.binary[self.idx..self.idx+11].iter().join(""), 2)?;
                 self.idx += 11;

@@ -9,6 +9,7 @@ edition = "2021"
 itermore = "0.1.0"
 itertools = "0.10.1"
 priority-queue = "1.2.1"
+cached = "0.26.2"
 
 rayon = "1.5.1"
 

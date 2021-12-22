@@ -9,7 +9,7 @@ use crate::utils::AdventError;
 pub fn run() -> (usize, usize) {
     let input = fs::read_to_string("data/day21a.dat").expect("input file does not exist");
     let mut start: DiracDice = input.parse().expect("invalid input");
-    let (w1, w2) = count_wins(start.players[0] as u8, start.players[1] as u8, 0, 0);
+    let (w1, w2) = dirac_dice_wins(start.players[0] as u8, start.players[1] as u8);
 
     (
         start.two_players(),
@@ -96,38 +96,42 @@ impl FromStr for DiracDice {
     }
 }
 
+fn dirac_dice_wins(start1: u8, start2: u8) -> (usize, usize) {
+    count_wins(start1, start2, 0, 0, true)
+}
 
 #[cached]
-fn count_wins(start1: u8, start2: u8, score1: u8, score2: u8) -> (usize, usize) {
+fn count_wins(start1: u8, start2: u8, score1: u8, score2: u8, p1active: bool) -> (usize, usize) {
+    if score1 >= 21 {
+        return (1, 0)
+    }
+    if score2 >= 21 {
+        return (0, 1)
+    }
+
     let mut wins1 = 0;
     let mut wins2 = 0;
 
-    for (i1, j1, k1) in iproduct!(1..=3, 1..=3, 1..=3) {
-        let d1 = i1 + j1 + k1;
-        let s1 = start1 + d1;
-        let s1 = if s1 % 10 == 0 {10} else {s1 % 10};
-        let sc1 = score1 + s1;
+    for (i, j, k) in iproduct!(1..=3, 1..=3, 1..=3) {
+        let d = i + j + k;
+        let mut s1 = start1;
+        let mut s2 = start2;
+        let mut sc1 = score1;
+        let mut sc2 = score2;
 
-        if sc1 >= 21 {
-            wins1 += 1;
-            continue
+        if p1active {
+            s1 += d;
+            s1 = if s1 % 10 == 0 {10} else {s1 % 10};
+            sc1 += s1;
+        } else {
+            s2 += d;
+            s2 = if s2 % 10 == 0 {10} else {s2 % 10};
+            sc2 += s2;
         }
 
-        for (i2, j2, k2) in iproduct!(1..=3, 1..=3, 1..=3) {
-            let d2 = i2 + j2 + k2;
-            let s2 = start2 + d2;
-            let s2 = if s2 % 10 == 0 {10} else {s2 % 10};
-            let sc2 = score2 + s2;
-
-            if sc2 >= 21 {
-                wins2 += 1;
-                continue
-            }
-
-            let (w1, w2) = count_wins(s1, s2, sc1, sc2);
-            wins1 += w1;
-            wins2 += w2;
-        }
+        let (w1, w2) = count_wins(s1, s2, sc1, sc2, !p1active);
+        wins1 += w1;
+        wins2 += w2;
     }
 
     (wins1, wins2)
@@ -146,7 +150,7 @@ mod tests {
 
         let mut start: DiracDice = input.parse().expect("invalid input");
 
-        let (w1, w2) = count_wins(start.players[0] as u8, start.players[1] as u8, 0, 0);
+        let (w1, w2) = dirac_dice_wins(start.players[0] as u8, start.players[1] as u8);
         assert_eq!(start.two_players(), 739785);
 
         assert_eq!(w1, 444356092776315);

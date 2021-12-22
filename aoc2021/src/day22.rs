@@ -209,35 +209,6 @@ mod tests {
         assert_eq!(cuboids.count_on_50(), 590784);
 
         let input = r"
-            on x=0..5,y=0..5,z=0..0
-            on x=-1..2,y=-1..2,z=0..0
-            off x=2..4,y=2..4,z=0..0
-        ";
-
-        let cuboids: Cuboids = input.parse().expect("invalid input");
-        assert_eq!(cuboids.count_on(), 34);
-
-        let input = r"
-            on x=0..5,y=0..5,z=0..0
-            off x=2..4,y=2..4,z=0..0
-            off x=1..2,y=4..5,z=0..0
-        ";
-
-        let cuboids: Cuboids = input.parse().expect("invalid input");
-        assert_eq!(cuboids.count_on(), 24);
-
-        let input = r"
-            on x=0..5,y=0..5,z=0..0
-            on x=-1..2,y=-1..2,z=0..0
-            off x=2..4,y=2..4,z=0..0
-            off x=1..2,y=4..5,z=0..0
-            off x=-1..8,y=4..8,z=0..0
-        ";
-
-        let cuboids: Cuboids = input.parse().expect("invalid input");
-        assert_eq!(cuboids.count_on(), 25);
-
-        let input = r"
             on x=-5..47,y=-31..22,z=-19..33
             on x=-44..5,y=-27..21,z=-14..35
             on x=-49..-1,y=-11..42,z=-10..38
@@ -302,5 +273,41 @@ mod tests {
 
         let cuboids: Cuboids = input.parse().expect("invalid input");
         assert_eq!(cuboids.count_on(), 2758514936282235);
+    }
+
+    #[test]
+    fn turning_on_twice() {
+
+        let input = r"
+            on x=0..5,y=0..5,z=0..0
+            on x=-1..2,y=-1..2,z=0..0
+            off x=2..4,y=2..4,z=0..0
+        ";
+
+        let cuboids: Cuboids = input.parse().expect("invalid input");
+        assert_eq!(cuboids.count_on(), 34);
+    }
+
+    #[test]
+    fn turning_off_twice() {
+        let input = r"
+            on x=0..5,y=0..5,z=0..0
+            off x=2..4,y=2..4,z=0..0
+            off x=1..2,y=4..5,z=0..0
+        ";
+
+        let cuboids: Cuboids = input.parse().expect("invalid input");
+        assert_eq!(cuboids.count_on(), 24);
+
+        let input = r"
+            on x=0..5,y=0..5,z=0..0
+            on x=-1..2,y=-1..2,z=0..0
+            off x=2..4,y=2..4,z=0..0
+            off x=1..2,y=4..5,z=0..0
+            off x=-1..8,y=4..8,z=0..0
+        ";
+
+        let cuboids: Cuboids = input.parse().expect("invalid input");
+        assert_eq!(cuboids.count_on(), 25);
     }
 }

@@ -11,8 +11,6 @@ pub fn run() -> (usize, usize) {
     let mut start: DiracDice = input.parse().expect("invalid input");
     let (w1, w2) = count_wins(start.players[0] as u8, start.players[1] as u8, 0, 0);
 
-    println!("{}, {}", w1, w2);
-
     (
         start.two_players(),
         cmp::max(w1, w2),

@@ -5,8 +5,6 @@ use rayon::prelude::*;
 
 use crate::utils::AdventError;
 
-const DIGITS: usize = 14;
-
 // it's Christmas, I will just let my computer brute force this one...
 pub fn run() -> (isize, isize) {
     let input = fs::read_to_string("data/day24a.dat").expect("input file does not exist");
@@ -18,6 +16,7 @@ pub fn run() -> (isize, isize) {
     )
 }
 
+#[derive(Debug)]
 enum Instruction {
     Inp(usize),
     Add(usize, Parameter),
@@ -27,7 +26,7 @@ enum Instruction {
     Eq(usize, Parameter),
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum Parameter {
     Register(usize),
     Literal(isize),
@@ -81,6 +80,7 @@ impl FromStr for Instruction {
     }
 }
 
+#[derive(Debug)]
 struct Alu {
     instructions: Vec<Instruction>,
 }
@@ -103,7 +103,7 @@ impl FromStr for Alu {
 }
 
 impl Alu {
-    fn eval(&self, register: &mut [isize; 4], mut value: isize) -> bool {
+    fn eval<const DIGITS: usize>(&self, register: &mut [isize; 4], mut value: isize) -> bool {
         let mut idx = 0;
         let mut input = [0; DIGITS];
         for i in (0..DIGITS).rev() {
@@ -167,7 +167,7 @@ fn find_largest(alu: &Alu) -> isize {
     let lower = 98998519596997;
     (lower..99999999999999).into_par_iter().rev().find_map_first(|cur| {
         let mut out = [0; 4];
-        if alu.eval(&mut out, cur) && out[3] == 0 {
+        if alu.eval::<14>(&mut out, cur) && out[3] == 0 {
             println!("{} -> {:?}", cur, out);
             return Some(cur)
         }
@@ -187,7 +187,7 @@ fn find_smallest(alu: &Alu) -> isize {
     let lower = 31111111111111;
     (lower..upper).into_par_iter().find_map_first(|cur| {
         let mut out = [0; 4];
-        if alu.eval(&mut out, cur) && out[3] == 0 {
+        if alu.eval::<14>(&mut out, cur) && out[3] == 0 {
             println!("{} -> {:?}", cur, out);
             return Some(cur)
         }
@@ -208,7 +208,9 @@ mod tests {
 
         let alu: Alu = input.parse().expect("invalid input");
         let mut out = [0; 4];
-        alu.eval(&mut out, 5);
+        alu.eval::<1>(&mut out, 5);
+        println!("alu: {:?}", alu);
+        println!("out: {:?}", out);
         assert_eq!(out, [0, -5, 0, 0]);
 
         let input = r"
@@ -220,13 +222,11 @@ mod tests {
 
         let alu: Alu = input.parse().expect("invalid input");
         let mut out = [0; 4];
-        alu.eval(&mut out, 35);
+        alu.eval::<2>(&mut out, 35);
         assert_eq!(out, [0, 5, 0, 0]);
 
         let mut out = [0; 4];
-        alu.eval(&mut out, 39);
+        alu.eval::<2>(&mut out, 39);
         assert_eq!(out, [0, 9, 0, 1]);
-
     }
-
 }

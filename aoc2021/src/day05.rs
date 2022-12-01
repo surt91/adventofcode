@@ -43,7 +43,7 @@ fn count(data: &[(Point, Point)], threshold: usize, diagonals: bool) -> usize {
 fn _print_map(map: &HashMap<Point, usize>) {
     for j in 0..10 {
         for i in 0..10 {
-            let c = map.get(&Point::new(i, j)).or(Some(&0)).unwrap();
+            let c = map.get(&Point::new(i, j)).unwrap_or(&0);
             print!("{} ", c);
         }
         println!();

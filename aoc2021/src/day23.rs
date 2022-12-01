@@ -173,7 +173,7 @@ fn travel_out(s: &Situation, start: isize, a: Amphipod) -> Vec<Situation> {
         if travel_check(s, start, end) {
             let mut n = s.clone();
             n.hallway[end as usize] = a;
-            n.spent_energy += (1+(end-start).abs() as usize) * a.cost();
+            n.spent_energy += (1+(end - start).unsigned_abs()) * a.cost();
             out.push(n);
         }
     }
@@ -201,7 +201,7 @@ fn lower_energy_bound(s: &Situation) -> usize {
         match s.hallway[i] {
             Amphipod::None => {},
             a => {
-                e += (1+(i as isize - a.pos()).abs() as usize) * a.cost()
+                e += (1+(i as isize - a.pos()).unsigned_abs()) * a.cost()
             }
         }
     }
@@ -210,7 +210,7 @@ fn lower_energy_bound(s: &Situation) -> usize {
         for (n, i) in s.room(species).iter().enumerate() {
             match *i {
                 Amphipod::None => {},
-                a if a != species => e += (n + (species.pos() - a.pos()).abs() as usize) * a.cost(),
+                a if a != species => e += (n + (species.pos() - a.pos()).unsigned_abs()) * a.cost(),
                 _ => {}
             }
         }
@@ -275,7 +275,7 @@ fn move_in(s: &Situation, species: Amphipod, start: isize) -> Option<Situation> 
         let mut n = s.clone();
         n.hallway[start as usize] = Amphipod::None;
         n.room_mut(species)[0] = species;
-        n.spent_energy += (1+(end - start).abs() as usize) * species.cost();
+        n.spent_energy += (1+(end - start).unsigned_abs()) * species.cost();
         Some(n)
     } else {
         None

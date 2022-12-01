@@ -140,7 +140,7 @@ impl Packet {
     fn sum_versions(&self) -> usize {
         let mut sum = self.version as usize;
         if let PacketPayload::Operator(_op, data) = &self.payload {
-            sum += data.iter().map(|p| p.sum_versions() as usize).sum::<usize>();
+            sum += data.iter().map(|p| p.sum_versions()).sum::<usize>();
         };
         sum
     }

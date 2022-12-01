@@ -1,9 +1,10 @@
 use std::cmp::Ordering;
 
-use crate::utils::{read_lines, binary};
+use crate::{utils::{split_lines, binary}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let diagnostics = read_lines("data/day03a.dat");
+    let input = data_str!("day03a");
+    let diagnostics = split_lines(input);
 
     (
         power_consumption(&diagnostics),

@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 
-use crate::utils::{read_lines, parse_single_line};
+use crate::{utils::{parse_single_line, split_lines}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day06a.dat");
+    let input = data_str!("day06a");
+    let lines = split_lines(input);
     let data = parse_single_line(&lines[0]).expect("invalid input");
 
     (

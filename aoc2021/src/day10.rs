@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 
-use crate::utils::read_lines;
+use crate::{data_str, utils::split_lines};
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day10a.dat");
+    let input = data_str!("day10a");
+    let lines = split_lines(input);
 
     (
         score(&lines),

@@ -1,9 +1,10 @@
 use itermore::IterMore;
 
-use crate::utils::{AdventError, read_lines};
+use crate::{utils::{AdventError, split_lines}, data_str};
 
 pub fn run() -> (i32, i32) {
-    let lines = read_lines("data/day01a.dat");
+    let input = data_str!("day01a");
+    let lines = split_lines(input);
     let data = parse(&lines).expect("invalid input");
 
     (

@@ -1,11 +1,7 @@
-use std::{fs, str::FromStr, num::ParseIntError};
+use std::{str::FromStr, num::ParseIntError};
+
 
 use super::AdventError;
-
-pub fn read_lines(file: &str) -> Vec<String> {
-    let input = fs::read_to_string(file).expect("input file does not exist");
-    split_lines(&input)
-}
 
 pub fn split_lines(input: &str) -> Vec<String> {
     input.split('\n')

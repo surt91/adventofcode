@@ -1,7 +1,8 @@
-use crate::utils::{read_lines, parse_single_line};
+use crate::{utils::{parse_single_line, split_lines}, data_str};
 
 pub fn run() -> (isize, isize) {
-    let lines = read_lines("data/day07a.dat");
+    let input = data_str!("day07a");
+    let lines = split_lines(input);
     let data = parse_single_line(&lines[0]).expect("invalid input");
 
     (

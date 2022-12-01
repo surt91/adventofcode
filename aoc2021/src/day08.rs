@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::utils::{read_lines, AdventError};
+use crate::{utils::{AdventError, split_lines}, data_str};
 
 type Line = ([String; 10], [String; 4]);
 
@@ -23,7 +23,8 @@ type Line = ([String; 10], [String; 4]);
 //  gggg    gggg    ....    gggg    gggg
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day08a.dat");
+    let input = data_str!("day08a");
+    let lines = split_lines(input);
     let parsed = parse(&lines).expect("invalid input");
 
     (

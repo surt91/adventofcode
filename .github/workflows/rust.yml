@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  aoc:
 
     runs-on: ubuntu-latest
 
@@ -25,9 +25,7 @@ jobs:
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Build 2021
-      working-directory: aoc2021
+    - name: Build
       run: cargo build --verbose
-    - name: Run tests 2021
-      working-directory: aoc2021
+    - name: Tests
       run: cargo test --verbose

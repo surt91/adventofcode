@@ -1,9 +1,10 @@
 use std::{collections::HashMap, str::FromStr, fmt, cmp::max};
 
-use crate::utils::{AdventError, read_lines};
+use crate::{utils::{AdventError, split_lines}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let lines = read_lines("data/day05a.dat");
+    let input = data_str!("day05a");
+    let lines = split_lines(input);
     let data = parse(&lines).expect("invalid input");
 
     (

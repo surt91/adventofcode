@@ -6,6 +6,7 @@ mod two_dimensional;
 mod graph;
 pub mod letters;
 pub mod binary;
+pub mod files;
 
 pub use string::*;
 pub use advent_error::AdventError;

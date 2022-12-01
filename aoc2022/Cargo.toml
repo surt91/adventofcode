@@ -6,12 +6,12 @@ edition = "2021"
 [dependencies]
 aoc2021 = { path = "../aoc2021" }
 
-itertools = "0.10.1"
+itertools = "0.10"
 
-colored = "2.0.0"
+colored = "2.0"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.4"
 
 [[bench]]
 name = "all_days"

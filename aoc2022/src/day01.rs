@@ -1,12 +1,12 @@
-use std::fs;
-
 use itertools::Itertools;
 
+use aoc2021::data_str;
 use aoc2021::utils::AdventError;
 
 pub fn run() -> (u32, u32) {
-    let input = fs::read_to_string("data/day01.dat").expect("input file does not exist");
-    let data = parse(&input).expect("invalid input");
+
+    let input = data_str!("day01");
+    let data = parse(input).expect("invalid input");
 
     (
         elf_with_most_calories(&data),

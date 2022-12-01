@@ -1,7 +1,8 @@
-use crate::utils::{AdventError, read_lines};
+use crate::{utils::{AdventError, split_lines}, data_str};
 
 pub fn run() -> (i64, i64) {
-    let lines = read_lines("data/day02a.dat");
+    let input = data_str!("day02a");
+    let lines = split_lines(input);
     let actions = parse(&lines).expect("invalid input");
 
     (

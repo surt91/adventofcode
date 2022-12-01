@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+    "aoc2021",
+    "aoc2022",
+]
+
+default-members = [
+    "aoc2022"
+]

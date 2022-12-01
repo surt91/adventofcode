@@ -1,0 +1,18 @@
+[package]
+name = "aoc2022"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc2021 = { path = "../aoc2021" }
+
+itertools = "0.10.1"
+
+colored = "2.0.0"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "all_days"
+harness = false

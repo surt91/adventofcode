@@ -5,7 +5,7 @@ use itertools::Itertools;
 use aoc2021::data_str;
 use aoc2021::utils::{AdventError, split_lines};
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 enum Shape {
     Rock,
     Paper,
@@ -26,6 +26,14 @@ impl Outcome {
             Outcome::Loss => 0,
         }
     }
+
+    fn needed_shape(&self, other: &Shape) -> Shape {
+        match self {
+            Outcome::Win => other.loses(),
+            Outcome::Draw => other.draws(),
+            Outcome::Loss => other.wins(),
+        }
+    }
 }
 
 impl Shape {
@@ -42,34 +50,34 @@ impl Shape {
     }
 
     fn outcome(&self, other: &Shape) -> Outcome {
-        if self.wins() == other {
+        if &self.wins() == other {
             Outcome::Win
-        } else if self.draws() == other {
+        } else if &self.draws() == other {
             Outcome::Draw
-        } else if self.loses() == other {
+        } else if &self.loses() == other {
             Outcome::Loss
         } else {
             unreachable!()
         }
     }
 
-    fn draws(&self) -> &Shape {
-        self
+    fn draws(&self) -> Shape {
+        self.clone()
     }
 
-    fn loses(&self) -> &Shape {
+    fn loses(&self) -> Shape {
         match self {
-            Shape::Rock => &Shape::Paper,
-            Shape::Paper => &Shape::Scissor,
-            Shape::Scissor => &Shape::Rock,
+            Shape::Rock => Shape::Paper,
+            Shape::Paper => Shape::Scissor,
+            Shape::Scissor => Shape::Rock,
         }
     }
 
-    fn wins(&self) -> &Shape {
+    fn wins(&self) -> Shape {
         match self {
-            Shape::Rock => &Shape::Scissor,
-            Shape::Paper => &Shape::Rock,
-            Shape::Scissor => &Shape::Paper,
+            Shape::Rock => Shape::Scissor,
+            Shape::Paper => Shape::Rock,
+            Shape::Scissor => Shape::Paper,
         }
     }
 }
@@ -87,20 +95,43 @@ impl FromStr for Shape {
     }
 }
 
+impl FromStr for Outcome {
+    type Err = AdventError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "X" => Ok(Outcome::Loss),
+            "Y" => Ok(Outcome::Draw),
+            "Z" => Ok(Outcome::Win),
+            _ => Err(AdventError::UnexpectedElement { found: s.to_string(), expected: &["X", "Y", "Z"] })
+        }
+    }
+}
+
 pub fn run() -> (u32, u32) {
 
     let input = data_str!("day02");
     let data = parse(input);
+    let data2 = parse_for_outcome(input);
 
     (
         points_from_strategy(&data),
-        0,
+        points_from_strategy2(&data2),
     )
 }
 
 fn points_from_strategy(strategy: &[(Shape, Shape)]) -> u32 {
     strategy.iter()
         .map(|(opponent, myself)| myself.score(opponent))
+        .sum()
+}
+
+fn points_from_strategy2(strategy: &[(Shape, Outcome)]) -> u32 {
+    strategy.iter()
+        .map(|(opponent, outcome)| {
+            let myself = outcome.needed_shape(opponent);
+            myself.score(opponent)
+        })
         .sum()
 }
 
@@ -113,6 +144,17 @@ fn parse(input: &str) -> Vec<(Shape, Shape)> {
             )
             .collect_tuple()
             .unwrap()
+        })
+        .collect()
+}
+
+fn parse_for_outcome(input: &str) -> Vec<(Shape, Outcome)> {
+    split_lines(input).iter()
+        .map(|line| {
+            let mut chars = line.split(' ');
+            let shape = chars.next().unwrap().parse().unwrap();
+            let outcome = chars.next().unwrap().parse().unwrap();
+            (shape, outcome)
         })
         .collect()
 }
@@ -130,7 +172,9 @@ mod tests {
         ";
 
         let data = parse(input);
+        let data2 = parse_for_outcome(input);
 
         assert_eq!(points_from_strategy(&data), 15);
+        assert_eq!(points_from_strategy2(&data2), 12);
     }
 }

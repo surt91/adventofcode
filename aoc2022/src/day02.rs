@@ -1,7 +1,5 @@
 use std::str::FromStr;
 
-use itertools::Itertools;
-
 use aoc2021::data_str;
 use aoc2021::utils::{AdventError, split_lines};
 
@@ -111,8 +109,8 @@ impl FromStr for Outcome {
 pub fn run() -> (u32, u32) {
 
     let input = data_str!("day02");
-    let data = parse(input);
-    let data2 = parse_for_outcome(input);
+    let data = parse(input).expect("invalid input");
+    let data2 = parse_for_outcome(input).expect("invalid input");
 
     (
         points_from_strategy(&data),
@@ -135,26 +133,32 @@ fn points_from_strategy2(strategy: &[(Shape, Outcome)]) -> u32 {
         .sum()
 }
 
-fn parse(input: &str) -> Vec<(Shape, Shape)> {
+fn parse(input: &str) -> Result<Vec<(Shape, Shape)>, AdventError> {
     split_lines(input).iter()
         .map(|line| {
-            line.split(' ')
-            .map(|x|
-                x.parse().unwrap()
-            )
-            .collect_tuple()
-            .unwrap()
+            let mut chars = line.split(' ');
+            let shape = chars.next()
+                .ok_or(AdventError::WrongNumberOfElements)?
+                .parse()?;
+            let outcome = chars.next()
+                .ok_or(AdventError::WrongNumberOfElements)?
+                .parse()?;
+            Ok((shape, outcome))
         })
         .collect()
 }
 
-fn parse_for_outcome(input: &str) -> Vec<(Shape, Outcome)> {
+fn parse_for_outcome(input: &str) -> Result<Vec<(Shape, Outcome)>, AdventError> {
     split_lines(input).iter()
         .map(|line| {
             let mut chars = line.split(' ');
-            let shape = chars.next().unwrap().parse().unwrap();
-            let outcome = chars.next().unwrap().parse().unwrap();
-            (shape, outcome)
+            let shape = chars.next()
+                .ok_or(AdventError::WrongNumberOfElements)?
+                .parse()?;
+            let outcome = chars.next()
+                .ok_or(AdventError::WrongNumberOfElements)?
+                .parse()?;
+            Ok((shape, outcome))
         })
         .collect()
 }
@@ -171,8 +175,8 @@ mod tests {
             C Z
         ";
 
-        let data = parse(input);
-        let data2 = parse_for_outcome(input);
+        let data = parse(input).expect("invalid input");
+        let data2 = parse_for_outcome(input).expect("invalid input");
 
         assert_eq!(points_from_strategy(&data), 15);
         assert_eq!(points_from_strategy2(&data2), 12);

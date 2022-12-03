@@ -1,10 +1,10 @@
-use std::collections::HashSet;
+use bit_set::BitSet;
 
 use aoc2021::data_str;
 use aoc2021::utils::{AdventError, split_lines};
 use itertools::Itertools;
 
-pub fn run() -> (u32, u32) {
+pub fn run() -> (usize, usize) {
 
     let input = data_str!("day03");
     let data = parse(input);
@@ -16,14 +16,14 @@ pub fn run() -> (u32, u32) {
     )
 }
 
-fn priority_sum(rucksacks: &[(HashSet<char>, HashSet<char>)]) -> u32 {
+fn priority_sum(rucksacks: &[(BitSet, BitSet)]) -> usize {
     rucksacks.iter()
         .flat_map(|(first, second)| first.intersection(second).next())
-        .flat_map(|item| priority(*item))
+        .flat_map(priority)
         .sum()
 }
 
-fn group_sum(elfs: &[HashSet<char>]) -> u32 {
+fn group_sum(elfs: &[BitSet]) -> usize {
     elfs.iter()
         .chunks(3)
         .into_iter()
@@ -33,42 +33,50 @@ fn group_sum(elfs: &[HashSet<char>]) -> u32 {
         .sum()
 }
 
-fn priority(item: char) -> Result<u32, AdventError> {
-    println!("{} -> {}", item, if item.is_ascii_lowercase() {item as u32 - 96} else {item as u32 - 64});
-
-    if item.is_ascii_lowercase() {
-        Ok(item as u32 - 96)
-    } else if item.is_ascii_uppercase() {
-        Ok(item as u32 - 64 + 26)
+fn priority(item: usize) -> Result<usize, AdventError> {
+    let ch: char = (item as u8).into();
+    if ch.is_ascii_lowercase() {
+        Ok(item - 96)
+    } else if ch.is_ascii_uppercase() {
+        Ok(item - 64 + 26)
     } else {
         Err(AdventError::UnexpectedElement { found: item.to_string(), expected: &["a-zA-Z"] })
     }
 }
 
-fn badge((elf1, elf2, elf3): (HashSet<char>, HashSet<char>, HashSet<char>)) -> char {
-    *elf1.intersection(&elf2)
-        .cloned()
-        .collect::<HashSet<char>>()
-        .intersection(&elf3)
-        .next()
-        .unwrap()
+fn badge((mut elf1, elf2, elf3): (BitSet, BitSet, BitSet)) -> usize {
+    elf1.intersect_with(&elf2);
+    elf1.intersect_with(&elf3);
+    elf1.iter().next().unwrap()
 }
 
-fn parse(input: &str) -> Vec<(HashSet<char>, HashSet<char>)> {
+fn parse(input: &str) -> Vec<(BitSet, BitSet)> {
     split_lines(input).iter()
         .map(|line| {
             let length = line.len();
-            let compartement_size = length / 2;
-            let first_half = line.chars().take(compartement_size).collect();
-            let second_half = line.chars().skip(compartement_size).collect();
+            let compartment_size = length / 2;
+            let first_half = line.as_bytes()
+                .iter()
+                .take(compartment_size)
+                .map(|&x| x.into())
+                .collect();
+            let second_half = line.as_bytes()
+                .iter()
+                .skip(compartment_size)
+                .map(|&x| x.into())
+                .collect();
             (first_half, second_half)
         })
         .collect()
 }
 
-fn parse2(input: &str) -> Vec<HashSet<char>> {
+fn parse2(input: &str) -> Vec<BitSet> {
     split_lines(input).iter()
-        .map(|line| line.chars().collect())
+        .map(|line| BitSet::from_iter(
+            line.as_bytes()
+                .iter()
+                .map(|&x| x.into())
+        ))
         .collect()
 }
 

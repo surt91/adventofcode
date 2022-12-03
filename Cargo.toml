@@ -6,5 +6,5 @@ members = [
 ]
 
 default-members = [
-    "aoc2021",
+    "aoc2022",
 ]

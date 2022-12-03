@@ -26,6 +26,7 @@ fn main() {
         match arg.parse::<usize>() {
             Ok(n @ 1) => show(n, day01::run()),
             Ok(n @ 2) => show(n, day02::run()),
+            Ok(n @ 3) => show(n, day02::run()),
             Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {}", n).yellow()),
             Err(e) => println!("Invalid Argument: {}.", e),
         }
@@ -39,4 +40,5 @@ mod tests {
 
     test!{day01: (67027, 197291)}
     test!{day02: (13052, 13693)}
+    test!{day03: (7793, 0)}
 }

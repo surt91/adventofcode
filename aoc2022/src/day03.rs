@@ -34,13 +34,10 @@ fn group_sum(elfs: &[BitSet]) -> usize {
 }
 
 fn priority(item: usize) -> Result<usize, AdventError> {
-    let ch: char = (item as u8).into();
-    if ch.is_ascii_lowercase() {
-        Ok(item - 96)
-    } else if ch.is_ascii_uppercase() {
-        Ok(item - 64 + 26)
-    } else {
-        Err(AdventError::UnexpectedElement { found: item.to_string(), expected: &["a-zA-Z"] })
+    match (item as u8) as char {
+        ch if ch.is_ascii_lowercase() => Ok(item - 96),
+        ch if ch.is_ascii_uppercase() => Ok(item - 64 + 26),
+        _ => Err(AdventError::UnexpectedElement { found: item.to_string(), expected: &["a-zA-Z"] }),
     }
 }
 

@@ -41,6 +41,7 @@ dependencies = [
  "colored",
  "criterion",
  "itertools",
+ "scan_fmt",
 ]
 
 [[package]]

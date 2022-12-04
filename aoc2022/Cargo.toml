@@ -10,6 +10,7 @@ itertools = "0.10"
 bit-set = "0.5"
 
 colored = "2.0"
+scan_fmt = "0.2"
 
 [dev-dependencies]
 criterion = "0.4"

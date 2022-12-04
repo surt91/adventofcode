@@ -16,6 +16,11 @@ impl Range {
     fn contains(&self, other: &Range) -> bool {
         self.start <= other.start && self.end >= other.end
     }
+
+    fn overlaps(&self, other: &Range) -> bool {
+        self.start <= other.start && self.end >= other.start
+        || self.start <= other.end && self.end >= other.end
+    }
 }
 
 pub fn run() -> (usize, usize) {
@@ -25,15 +30,23 @@ pub fn run() -> (usize, usize) {
 
     (
         count_full_overlap(&data),
-        0
+        count_partial_overlap(&data)
     )
 }
 
 fn count_full_overlap(ranges: &[(Range, Range)]) -> usize {
     ranges.iter()
-        .filter(|(range_elf1, range_elf2)| {
+        .filter(|(range_elf1, range_elf2)|
             range_elf1.contains(range_elf2) || range_elf2.contains(range_elf1)
-        })
+        )
+        .count()
+}
+
+fn count_partial_overlap(ranges: &[(Range, Range)]) -> usize {
+    ranges.iter()
+        .filter(|(range_elf1, range_elf2)|
+            range_elf1.overlaps(range_elf2) || range_elf2.contains(range_elf1)
+        )
         .count()
 }
 
@@ -70,5 +83,6 @@ mod tests {
         let data = parse(input);
 
         assert_eq!(count_full_overlap(&data), 2);
+        assert_eq!(count_partial_overlap(&data), 4);
     }
 }

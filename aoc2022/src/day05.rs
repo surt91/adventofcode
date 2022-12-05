@@ -6,26 +6,36 @@ use aoc2021::utils::split_lines;
 
 type Instruction = (usize, usize, usize);
 
-pub fn run() -> (String, usize) {
+pub fn run() -> (String, String) {
 
     let input = data_str!("day05");
     let (stacks, instructions) = parse(input);
 
     (
-        find_top_crates(stacks, instructions),
-        0
+        find_top_crates_9000(stacks.clone(), &instructions),
+        find_top_crates_9001(stacks, &instructions),
+
     )
 }
 
-fn find_top_crates(mut stacks: Vec<Vec<char>>, instructions: Vec<Instruction>) -> String {
-    for (num, from, to) in instructions {
-        println!("{:?}", stacks);
-        println!("{} from {} to {}", num, from, to);
+fn find_top_crates_9000(mut stacks: Vec<Vec<char>>, instructions: &[Instruction]) -> String {
+    for &(num, from, to) in instructions {
         for _ in 0..num {
-            println!(".");
             let chest = stacks[from - 1].pop().unwrap();
             stacks[to - 1].push(chest)
         }
+    }
+
+    stacks.iter()
+        .map(|stack| stack.last().unwrap())
+        .collect()
+}
+
+fn find_top_crates_9001(mut stacks: Vec<Vec<char>>, instructions: &[Instruction]) -> String {
+    for (num, from, to) in instructions {
+        let length = stacks[from - 1].len();
+        let mut tmp = stacks[from - 1].split_off(length - num);
+        stacks[to - 1].append(&mut tmp);
     }
 
     stacks.iter()
@@ -98,6 +108,7 @@ move 1 from 1 to 2
 
     let (stacks, instructions) = parse(input);
 
-        assert_eq!(find_top_crates(stacks, instructions), "CMZ");
+        assert_eq!(find_top_crates_9000(stacks.clone(), &instructions), "CMZ");
+        assert_eq!(find_top_crates_9001(stacks, &instructions), "MCD");
     }
 }

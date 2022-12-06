@@ -15,26 +15,22 @@ pub fn run() -> (usize, usize) {
 }
 
 fn start_of_packet_marker(datastream: &str) -> usize {
-    let chars: Vec<_> = datastream.chars().collect();
-    let index = chars.windows(4)
-        .take_while(|window| !window.iter().all_unique())
-        .count();
-    if index == 0 {
-        1
-    } else {
-        index + 4
-    }
+    find_marker(datastream, 4)
 }
 
 fn start_of_message_marker(datastream: &str) -> usize {
+    find_marker(datastream, 14)
+}
+
+fn find_marker(datastream: &str, length: usize) -> usize {
     let chars: Vec<_> = datastream.chars().collect();
-    let index = chars.windows(14)
+    let index = chars.windows(length)
         .take_while(|window| !window.iter().all_unique())
         .count();
     if index == 0 {
         1
     } else {
-        index + 14
+        index + length
     }
 }
 

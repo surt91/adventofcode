@@ -46,5 +46,5 @@ mod tests {
     test!{day03: (7793, 2499)}
     test!{day04: (550, 931)}
     test!{day05: ("ZWHVFWQWW", "HZFZCCWWV")}
-    test!{day06: (1109, 0)}
+    test!{day06: (1109, 3965)}
 }

@@ -15,7 +15,6 @@ pub fn run() -> (usize, usize) {
 }
 
 fn start_of_packet_marker(datastream: &str) -> usize {
-    // prefix with ' ' to
     let chars: Vec<_> = datastream.chars().collect();
     let index = chars.windows(4)
         .take_while(|window| !window.iter().all_unique())
@@ -28,7 +27,6 @@ fn start_of_packet_marker(datastream: &str) -> usize {
 }
 
 fn start_of_message_marker(datastream: &str) -> usize {
-    // prefix with ' ' to
     let chars: Vec<_> = datastream.chars().collect();
     let index = chars.windows(14)
         .take_while(|window| !window.iter().all_unique())

@@ -1,12 +1,15 @@
 use std::{collections::HashMap, str::FromStr};
 
 use aoc2021::{data_str, utils::{split_lines, AdventError}};
+use itertools::Itertools;
 
+#[derive(Debug)]
 enum DirEntry {
     File(usize),
     Dir(String),
 }
 
+#[derive(Debug)]
 struct FileHierarchy {
     flat_mapping: HashMap<String, Vec<DirEntry>>,
 }
@@ -43,6 +46,7 @@ impl FromStr for FileHierarchy {
 
         let mut pwd: Vec<String> = Vec::new();
         let mut files: HashMap<String, Vec<DirEntry>> = HashMap::new();
+        files.insert("".to_string(), Vec::new());
 
         for line in lines {
             if line.starts_with("$ cd ..") {
@@ -89,15 +93,28 @@ pub fn run() -> (usize, usize) {
     let hierarchy: FileHierarchy = input.parse().unwrap();
 
     (
-        size_of_small_dirs(hierarchy),
-        0
+        size_of_small_dirs(&hierarchy),
+        find_smallest_dir_to_delete(&hierarchy)
     )
 }
 
-fn size_of_small_dirs(hierarchy: FileHierarchy) -> usize {
+fn size_of_small_dirs(hierarchy: &FileHierarchy) -> usize {
     hierarchy.size_of_dirs().iter()
         .filter(|&&size| size < 100000)
         .sum()
+}
+
+fn find_smallest_dir_to_delete(hierarchy: &FileHierarchy) -> usize {
+    let total = 70000000;
+    let required = 30000000;
+    let full = hierarchy.size_of_dir("");
+    let to_delete = required - (total - full);
+
+    *hierarchy.size_of_dirs().iter()
+        .filter(|&&size| size > to_delete)
+        .sorted()
+        .next()
+        .unwrap()
 }
 
 #[cfg(test)]
@@ -134,6 +151,7 @@ mod tests {
 
         let hierarchy: FileHierarchy = input.parse().unwrap();
 
-        assert_eq!(size_of_small_dirs(hierarchy), 95437);
+        assert_eq!(size_of_small_dirs(&hierarchy), 95437);
+        assert_eq!(find_smallest_dir_to_delete(&hierarchy), 24933642);
     }
 }

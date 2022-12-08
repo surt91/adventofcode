@@ -1,6 +1,7 @@
 use std::{collections::HashSet, str::FromStr};
 
 use aoc2021::{data_str, utils::{Map, AdventError}};
+use itertools::Itertools;
 
 struct TreeMap(Map);
 
@@ -53,6 +54,47 @@ impl TreeMap {
         }
         total_visible.len()
     }
+
+    fn scenic_score(&self, tree: (usize, usize)) -> usize {
+        let map = &self.0;
+        let mut score = 1;
+        for direction in [(1, 0), (0, 1), (0, -1), (-1, 0)] {
+            let mut view = 0;
+            let mut coord = tree;
+            score *= loop {
+                if let Some(c) = self.step(coord, direction) {
+                    view += 1;
+                    if map[c] < map[tree] {
+                        coord = c;
+                    } else {
+                        break view
+                    }
+                } else {
+                    break view
+                }
+            }
+        }
+        score
+    }
+
+    fn step(&self, (x, y): (usize, usize), (dx, dy): (i8, i8)) -> Option<(usize, usize)> {
+        let new_x = x as isize + dx as isize;
+        let new_y = y as isize + dy as isize;
+        if new_x < self.0.width as isize && new_x >= 0
+            && new_y < self.0.height as isize && new_y >= 0 {
+            Some((new_x as usize, new_y as usize))
+        } else {
+            None
+        }
+    }
+
+    fn max_scenic_score(&self) -> usize {
+        let map = &self.0;
+        (0..map.width).cartesian_product(0..map.height)
+            .map(|coord| self.scenic_score(coord))
+            .max()
+            .unwrap()
+    }
 }
 
 impl FromStr for TreeMap {
@@ -71,7 +113,7 @@ pub fn run() -> (usize, usize) {
 
     (
         map.visible_trees(),
-        0
+        map.max_scenic_score()
     )
 }
 
@@ -92,5 +134,8 @@ mod tests {
         let map: TreeMap = input.parse().unwrap();
 
         assert_eq!(map.visible_trees(), 21);
+        assert_eq!(map.scenic_score((2, 1)), 4);
+        assert_eq!(map.scenic_score((2, 3)), 8);
+        assert_eq!(map.max_scenic_score(), 8);
     }
 }

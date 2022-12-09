@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Sub};
+use std::ops::{Add, AddAssign, Sub, Neg};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Point {
@@ -11,9 +11,17 @@ impl Point {
         Point {x, y}
     }
 
-    pub fn distance_l0(&self, other: &Point) -> isize{
+    pub fn distance_l0(&self, other: &Point) -> isize {
         let diff = self - other;
         std::cmp::max(diff.x.abs(), diff.y.abs())
+    }
+
+    pub fn octant(&self, other: &Point) -> Point {
+        let diff = other - self;
+        Point {
+            x: diff.x.signum(),
+            y: diff.y.signum(),
+        }
     }
 }
 
@@ -37,5 +45,16 @@ impl Sub for &Point {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Point::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Neg for &Point {
+    type Output = Point;
+
+    fn neg(self) -> Self::Output {
+        Point {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }

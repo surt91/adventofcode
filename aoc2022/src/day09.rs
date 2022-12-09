@@ -46,37 +46,43 @@ impl FromStr for Direction {
 }
 
 struct PlanckRope {
-    head_position: Point,
-    tail_position: Point,
+    knots: Vec<Point>,
 
     visited_places: FxHashSet<Point>,
 }
 
 impl PlanckRope {
-    fn new() -> PlanckRope {
+    fn new(num_knots: usize) -> PlanckRope {
         let mut visited_places = FxHashSet::default();
         visited_places.insert(Point::new(0, 0));
-
         PlanckRope{
-            head_position: Point::new(0, 0),
-            tail_position: Point::new(0, 0),
+            knots: vec![Point::new(0, 0); num_knots],
 
             visited_places,
         }
     }
 
     fn step(&mut self, dir: &Direction) {
-        let old_position = self.head_position.clone();
-        match dir {
-            Direction::Left(_) => self.head_position += Point::new(-1, 0),
-            Direction::Right(_) => self.head_position += Point::new(1, 0),
-            Direction::Up(_) => self.head_position += Point::new(0, 1),
-            Direction::Down(_) => self.head_position += Point::new(0, -1),
-        }
-        // if the tail is not adjacent to the head anymore, it needs to move to the heads old position
-        if !self.is_tail_adjacent() {
-            self.tail_position = old_position;
-            self.visited_places.insert(self.tail_position.clone());
+        let offset = match dir {
+            Direction::Left(_) => Point::new(-1, 0),
+            Direction::Right(_) => Point::new(1, 0),
+            Direction::Up(_) => Point::new(0, 1),
+            Direction::Down(_) => Point::new(0, -1),
+        };
+
+        self.knots[0] += offset;
+
+        for i in 1..self.knots.len() {
+            // if the knot is not adjacent to the previous anymore, it needs to move
+            if !self.is_adjacent(i) {
+                let offset = self.knots[i].octant(&self.knots[i-1]);
+                self.knots[i] += offset;
+
+                // record the positions of the last one
+                if i == self.knots.len() - 1 {
+                    self.visited_places.insert(self.knots[i].clone());
+                }
+            }
         }
     }
 
@@ -93,8 +99,10 @@ impl PlanckRope {
         self.visited_places.len()
     }
 
-    fn is_tail_adjacent(&self) -> bool {
-        self.head_position.distance_l0(&self.tail_position) <= 1
+    fn is_adjacent(&self, idx: usize) -> bool {
+        assert!(idx > 0);
+        assert!(idx < self.knots.len());
+        self.knots[idx - 1].distance_l0(&self.knots[idx]) <= 1
     }
 }
 
@@ -102,11 +110,10 @@ pub fn run() -> (usize, usize) {
 
     let input = data_str!("day09");
     let data: Vec<Direction> = parse(input).expect("invalid input");
-    let mut rope = PlanckRope::new();
 
     (
-        rope.visited_positions(&data),
-        0
+        PlanckRope::new(2).visited_positions(&data),
+        PlanckRope::new(10).visited_positions(&data),
     )
 }
 
@@ -123,7 +130,7 @@ mod tests {
 
     #[test]
     fn example() {
-        let input = r"
+        let input1 = r"
             R 4
             U 4
             L 3
@@ -134,9 +141,24 @@ mod tests {
             R 2
         ";
 
-        let data: Vec<Direction> = parse(input).expect("invalid input");
-        let mut rope = PlanckRope::new();
+        let data1: Vec<Direction> = parse(input1).expect("invalid input");
 
-        assert_eq!(rope.visited_positions(&data), 13);
+        assert_eq!(PlanckRope::new(2).visited_positions(&data1), 13);
+        assert_eq!(PlanckRope::new(10).visited_positions(&data1), 1);
+
+        let input2 = r"
+            R 5
+            U 8
+            L 8
+            D 3
+            R 17
+            D 10
+            L 25
+            U 20
+        ";
+
+        let data2: Vec<Direction> = parse(input2).expect("invalid input");
+
+        assert_eq!(PlanckRope::new(10).visited_positions(&data2), 36);
     }
 }

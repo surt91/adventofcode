@@ -1,7 +1,8 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use aoc2021::{data_str, utils::{split_lines, AdventError}};
 use itertools::Itertools;
+use rustc_hash::FxHashMap;
 
 #[derive(Debug)]
 enum DirEntry {
@@ -11,11 +12,10 @@ enum DirEntry {
 
 #[derive(Debug)]
 struct FileHierarchy {
-    flat_mapping: HashMap<String, Vec<DirEntry>>,
+    flat_mapping: FxHashMap<String, Vec<DirEntry>>,
 }
 
 impl FileHierarchy {
-    // todo: cache the results for performance
     fn size_of_dir(&self, abs_path: &str) -> usize {
         self.flat_mapping
             .get(abs_path)
@@ -45,14 +45,15 @@ impl FromStr for FileHierarchy {
         let lines = split_lines(s);
 
         let mut pwd: Vec<String> = Vec::new();
-        let mut files: HashMap<String, Vec<DirEntry>> = HashMap::new();
-        files.insert("".to_string(), Vec::new());
+        let mut files: FxHashMap<String, Vec<DirEntry>> = FxHashMap::default();
+        files.insert("/".to_string(), Vec::new());
 
         for line in lines {
             if line.starts_with("$ cd ..") {
                 pwd.pop();
             } else if line.starts_with("$ cd /") {
                 pwd.clear();
+                pwd.push("/".to_string());
             } else if line.starts_with("$ cd") {
                 let new_dir = line.split(' ')
                     .last()
@@ -107,7 +108,7 @@ fn size_of_small_dirs(hierarchy: &FileHierarchy) -> usize {
 fn find_smallest_dir_to_delete(hierarchy: &FileHierarchy) -> usize {
     let total = 70000000;
     let required = 30000000;
-    let full = hierarchy.size_of_dir("");
+    let full = hierarchy.size_of_dir("/");
     let to_delete = required - (total - full);
 
     *hierarchy.size_of_dirs().iter()

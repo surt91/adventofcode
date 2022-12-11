@@ -54,7 +54,7 @@ impl Registers {
 }
 
 
-pub fn run() -> (isize, isize) {
+pub fn run() -> (isize, String) {
 
     let input = data_str!("day10");
     let program: Vec<Instruction> = parse(input).expect("invalid input");
@@ -62,7 +62,8 @@ pub fn run() -> (isize, isize) {
 
     (
         signal_strengths(&cycles, &program),
-        0
+        // TODO: parse the output into letters
+        draw(&program)
     )
 }
 
@@ -74,6 +75,32 @@ fn signal_strengths(cycles: &[usize], program: &[Instruction]) -> isize {
             *cycle as isize * states[*cycle]
         )
         .sum()
+}
+
+fn raster(trace: &[isize]) -> Vec<bool> {
+    trace.iter()
+        .skip(1) // pay for 1-based indexing
+        .take(240)
+        .enumerate()
+        .map(|(n, x)| n as isize % 40 >= x - 1 && n as isize % 40 <= x + 1)
+        .collect()
+}
+
+fn draw(program: &[Instruction]) -> String {
+    let trace = Registers::new().trace(program);
+    raster(&trace).iter()
+        .map(|&p| if p {'#'} else {'.'})
+        .enumerate()
+        .flat_map(|(i, c)| {
+            if i != 0 && i % 40 == 0 {
+                Some('\n')
+            } else {
+                None
+            }
+            .into_iter()
+            .chain(std::iter::once(c))
+        })
+        .collect()
 }
 
 fn parse(input: &str) -> Result<Vec<Instruction>, AdventError> {
@@ -252,5 +279,14 @@ mod tests {
         let cycles = [20, 60, 100, 140, 180, 220];
 
         assert_eq!(signal_strengths(&cycles, &program), 13140);
+
+        let expected_image =
+r"##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....";
+        assert_eq!(draw(&program), expected_image);
     }
 }

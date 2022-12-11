@@ -34,6 +34,7 @@ fn main() {
             Ok(n @ 8) => show(n, day08::run()),
             Ok(n @ 9) => show(n, day09::run()),
             Ok(n @ 10) => show(n, day10::run()),
+            Ok(n @ 11) => show(n, day11::run()),
             Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {n}").yellow()),
             Err(e) => println!("Invalid Argument: {e}."),
         }
@@ -61,4 +62,5 @@ r"####.#..#.###..#..#.####.###..#..#.####.
 #....#.#..###..#..#.#....###..#..#..#...
 #....#.#..#.#..#..#.#....#....#..#.#....
 ####.#..#.#..#.#..#.####.#.....##..####.")}
+    test!{day11: (0, 0)}
 }

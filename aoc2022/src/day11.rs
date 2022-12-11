@@ -7,16 +7,23 @@ struct Monkey {
     items: Vec<usize>,
     operation: Box<dyn Fn(usize) -> usize>,
     target: Box<dyn Fn(usize) -> usize>,
+    divisor: usize,
 
     inspections: usize,
 }
 
 impl Monkey {
-    fn new(items: Vec<usize>, operation: Box<dyn Fn(usize) -> usize>, target: Box<dyn Fn(usize) -> usize>) -> Monkey {
+    fn new(
+        items: Vec<usize>,
+        operation: Box<dyn Fn(usize) -> usize>,
+        target: Box<dyn Fn(usize) -> usize>,
+        divisor: usize) -> Monkey
+    {
         Monkey {
             items,
             operation,
             target,
+            divisor,
             inspections: 0,
         }
     }
@@ -28,6 +35,7 @@ impl Default for Monkey {
             items: Default::default(),
             operation: Box::new(|x| x),
             target: Box::new(|x| x),
+            divisor: Default::default(),
             inspections: Default::default()
         }
     }
@@ -38,6 +46,7 @@ impl Debug for Monkey {
         f.debug_struct("Monkey")
             .field("items", &self.items)
             .field("inspections", &self.inspections)
+            .field("divisor", &self.divisor)
             .finish()
     }
 }
@@ -46,13 +55,6 @@ impl FromStr for Monkey {
     type Err = AdventError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // Monkey 0:
-        //         Starting items: 79, 98
-        //         Operation: new = old * 19
-        //         Test: divisible by 23
-        //         If true: throw to monkey 2
-        //         If false: throw to monkey 3
-
         let lines = split_lines(s);
         let mut lines = lines.iter();
         lines.next();
@@ -109,26 +111,25 @@ impl FromStr for Monkey {
             .parse()?;
         let target = move |x| if x % divisor == 0 {target_true} else {target_false};
 
-        Ok(Monkey::new(items, Box::new(operation), Box::new(target)))
+        Ok(Monkey::new(items, Box::new(operation), Box::new(target), divisor))
     }
 }
 
 pub fn run() -> (usize, usize) {
 
     let input = data_str!("day11");
-    let mut data: Vec<Monkey> = parse(input).expect("invalid input");
+    let mut data1: Vec<Monkey> = parse(input).expect("invalid input");
+    let mut data2: Vec<Monkey> = parse(input).expect("invalid input");
 
     (
-        monkey_business_level(&mut data, 20),
-        0
+        monkey_business_level(&mut data1, 20, false),
+        monkey_business_level(&mut data2, 10000, true),
     )
 }
 
-fn monkey_business_level(monkeys: &mut [Monkey], num_rounds: usize) -> usize {
+fn monkey_business_level(monkeys: &mut [Monkey], num_rounds: usize, ridiculous_worry_levels: bool) -> usize {
     for _i in 0..num_rounds {
-        round(monkeys);
-
-        println!("after round {_i}: {monkeys:?}");
+        round(monkeys, ridiculous_worry_levels);
     }
 
     monkeys.iter()
@@ -139,15 +140,26 @@ fn monkey_business_level(monkeys: &mut [Monkey], num_rounds: usize) -> usize {
         .product()
 }
 
-fn round(monkeys: &mut [Monkey]) {
+fn round(monkeys: &mut [Monkey], ridiculous_worry_levels: bool) {
+    // addition and multiplication with modulo is distributive.
+    // in order for all modulos of all monkeys to work, we can multiply them together.
+    let magic_number: usize = monkeys.iter()
+        .map(|m| m.divisor)
+        .product();
+
     for i in 0..monkeys.len() {
         monkeys[i].inspections += monkeys[i].items.len();
         let monkey = std::mem::take(&mut monkeys[i]);
-        for &i in &monkey.items {
-            let new = (monkey.operation)(i);
-            let new = new / 3;
-            let target = (monkey.target)(new);
+        for &item in &monkey.items {
+            let mut new = (monkey.operation)(item);
 
+            if ridiculous_worry_levels {
+                new %= magic_number;
+            } else {
+                new /= 3;
+            }
+
+            let target = (monkey.target)(new);
             monkeys[target].items.push(new);
         }
         monkeys[i] = monkey;
@@ -198,8 +210,16 @@ mod tests {
         ";
 
         let mut data: Vec<Monkey> = parse(input).expect("invalid input");
+        assert_eq!(monkey_business_level(&mut data, 20, false), 10605);
 
-        assert_eq!(monkey_business_level(&mut data, 20), 10605);
+        let mut data: Vec<Monkey> = parse(input).expect("invalid input");
+        assert_eq!(monkey_business_level(&mut data, 1, true), 24);
+
+        let mut data: Vec<Monkey> = parse(input).expect("invalid input");
+        assert_eq!(monkey_business_level(&mut data, 20, true), 99*103);
+
+        let mut data: Vec<Monkey> = parse(input).expect("invalid input");
+        assert_eq!(monkey_business_level(&mut data, 10000, true), 2713310158);
 
     }
 }

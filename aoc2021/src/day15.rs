@@ -1,8 +1,4 @@
-use std::{collections::{HashSet, HashMap}};
-
-use priority_queue::DoublePriorityQueue;
-
-use crate::{utils::Map, data_str};
+use crate::{utils::{Map, shortest_path::astar}, data_str};
 
 pub fn run() -> (usize, usize) {
     let input = data_str!("day15a");
@@ -19,7 +15,7 @@ impl Map {
         let start = (0, 0);
         let end = (self.width-1, self.height-1);
 
-        let shortest = self.astar(start, end);
+        let shortest = astar(&self, start, end);
 
         shortest.iter().rev().skip(1).map(|p| self[*p] as usize).sum()
     }
@@ -52,50 +48,6 @@ impl Map {
             height,
             values
         }
-    }
-
-    fn astar(&self, start: (usize, usize), end: (usize, usize)) -> Vec<(usize, usize)> {
-        // https://de.wikipedia.org/wiki/A*-Algorithmus
-        let mut open_list = DoublePriorityQueue::new();
-        let mut closed_list = HashSet::new();
-        let mut g: HashMap<(usize, usize), usize> = HashMap::new();
-        let mut predecessor: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
-
-        open_list.push(start, 0);
-        g.insert(start, 0);
-        while let Some((current, _weight)) = open_list.pop_min() {
-            if current == end {
-                // path complete
-                let mut tmp = end;
-                let mut path = vec![end];
-                while tmp != start {
-                    let next = predecessor[&tmp];
-                    path.push(next);
-                    tmp = next;
-                }
-                return path
-            }
-            closed_list.insert(current);
-
-            for n in self.neighbors(current) {
-                if closed_list.contains(&n) {
-                    continue;
-                }
-                let tentative = g[&current] + self[n] as usize;
-                if open_list.get(&n).is_some() && tentative >= g[&n] {
-                    continue;
-                }
-                predecessor.insert(n, current);
-                g.insert(n, tentative);
-                // lower bound on the remaining cost
-                // assume all costs are >= 1 => h is manhattan distance
-                let h = end.0 - n.0 + end.1 - n.1;
-                let f = tentative + h;
-                open_list.push(n, f);
-            }
-        }
-
-        panic!("no path found")
     }
 }
 

@@ -28,6 +28,7 @@ dependencies = [
  "itertools",
  "priority-queue",
  "rayon",
+ "rustc-hash",
  "scan_fmt",
  "thiserror",
 ]

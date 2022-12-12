@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{utils::{UnionFind, Map}, data_str};
+use crate::{utils::{UnionFind, Map, shortest_path::Neighborful}, data_str};
 
 pub fn run() -> (usize, usize) {
     let input = data_str!("day09a");

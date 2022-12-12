@@ -1,7 +1,9 @@
 use core::fmt;
 use std::{str::FromStr, iter, ops::{Index, IndexMut}};
 
-use super::AdventError;
+use super::{AdventError, shortest_path::Neighborful};
+
+pub type Coord = (usize, usize);
 
 pub struct Map {
     pub width: usize,
@@ -10,20 +12,7 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn neighbors(&self, coordinate: (usize, usize)) -> impl Iterator<Item=(usize, usize)> {
-        let (x, y) = coordinate;
-        iter::once(
-            if y == 0 {None} else {Some((x, y-1))}
-        ).chain(iter::once(
-            if y >= self.height - 1  {None} else {Some((x, y+1))},
-        )).chain(iter::once(
-            if x == 0 {None} else {Some((x-1, y))},
-        )).chain(iter::once(
-            if x >= self.width - 1 {None} else {Some((x+1, y))},
-        )).flatten()
-    }
-
-    pub fn diagonal_neighbors(&self, coordinate: (usize, usize)) -> impl Iterator<Item=(usize, usize)> {
+    pub fn diagonal_neighbors(&self, coordinate: Coord) -> impl Iterator<Item=Coord> {
         let (x, y) = coordinate;
         self.neighbors(coordinate).map(Some).chain(iter::once(
             if x >= self.width - 1 || y >= self.height - 1 {None} else {Some((x+1, y+1))},
@@ -37,17 +26,35 @@ impl Map {
     }
 }
 
-impl Index<(usize, usize)> for Map {
+impl Index<&Coord> for Map {
     type Output = u8;
 
-    fn index(&self, coordinate: (usize, usize)) -> &Self::Output {
+    fn index(&self, coordinate: &Coord) -> &Self::Output {
+        let (x, y) = coordinate;
+        &self.values[*y][*x]
+    }
+}
+
+impl Index<Coord> for &Map {
+    type Output = u8;
+
+    fn index(&self, coordinate: Coord) -> &Self::Output {
         let (x, y) = coordinate;
         &self.values[y][x]
     }
 }
 
-impl IndexMut<(usize, usize)> for Map {
-    fn index_mut(&mut self, coordinate: (usize, usize)) -> &mut Self::Output {
+impl Index<Coord> for Map {
+    type Output = u8;
+
+    fn index(&self, coordinate: Coord) -> &Self::Output {
+        let (x, y) = coordinate;
+        &self.values[y][x]
+    }
+}
+
+impl IndexMut<Coord> for Map {
+    fn index_mut(&mut self, coordinate: Coord) -> &mut Self::Output {
         let (x, y) = coordinate;
         &mut self.values[y][x]
     }
@@ -96,5 +103,25 @@ impl FromStr for Map
                 values
             }
         )
+    }
+}
+
+impl Neighborful<Coord> for &Map {
+    fn neighbors(&self, coordinate: Coord) -> impl Iterator<Item=Coord> {
+        let (x, y) = coordinate;
+        iter::once(
+            if y == 0 {None} else {Some((x, y-1))}
+        ).chain(iter::once(
+            if y >= self.height - 1  {None} else {Some((x, y+1))},
+        )).chain(iter::once(
+            if x == 0 {None} else {Some((x-1, y))},
+        )).chain(iter::once(
+            if x >= self.width - 1 {None} else {Some((x+1, y))},
+        )).flatten()
+    }
+
+    fn distance(c1: Coord, c2: Coord) -> usize {
+        // assume all costs are >= 1 => h is manhattan distance:
+        ((c1.0 as isize - c2.0 as isize).abs() + (c1.1 as isize - c2.1 as isize).abs()) as usize
     }
 }

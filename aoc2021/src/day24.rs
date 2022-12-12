@@ -1,13 +1,13 @@
-use std::{fs, str::FromStr};
+use std::{str::FromStr};
 
 use itertools::Itertools;
 use rayon::prelude::*;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 // it's Christmas, I will just let my computer brute force this one...
 pub fn run() -> (isize, isize) {
-    let input = fs::read_to_string("data/day24a.dat").expect("input file does not exist");
+    let input = data_str!("day24a");
     let alu: Alu = input.parse().expect("invalid input");
 
     (
@@ -168,7 +168,7 @@ fn find_largest(alu: &Alu) -> isize {
     (lower..99999999999999).into_par_iter().rev().find_map_first(|cur| {
         let mut out = [0; 4];
         if alu.eval::<14>(&mut out, cur) && out[3] == 0 {
-            println!("{} -> {:?}", cur, out);
+            println!("{cur} -> {out:?}");
             return Some(cur)
         }
         None
@@ -188,7 +188,7 @@ fn find_smallest(alu: &Alu) -> isize {
     (lower..upper).into_par_iter().find_map_first(|cur| {
         let mut out = [0; 4];
         if alu.eval::<14>(&mut out, cur) && out[3] == 0 {
-            println!("{} -> {:?}", cur, out);
+            println!("{cur} -> {out:?}");
             return Some(cur)
         }
         None
@@ -209,8 +209,8 @@ mod tests {
         let alu: Alu = input.parse().expect("invalid input");
         let mut out = [0; 4];
         alu.eval::<1>(&mut out, 5);
-        println!("alu: {:?}", alu);
-        println!("out: {:?}", out);
+        println!("alu: {alu:?}");
+        println!("out: {out:?}");
         assert_eq!(out, [0, -5, 0, 0]);
 
         let input = r"

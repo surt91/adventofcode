@@ -88,7 +88,7 @@ impl FromStr for Monkey {
             match operands[1].as_str() {
                 "+" => op1 + op2,
                 "*" => op1 * op2,
-                _ => panic!("invalid operator: {:?}", operands)
+                _ => panic!("invalid operator: {operands:?}")
             }
         };
         let divisor: usize = lines.next()

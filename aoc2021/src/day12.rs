@@ -1,11 +1,11 @@
-use std::{collections::HashMap, str::FromStr, fs};
+use std::{collections::HashMap, str::FromStr};
 
 use itertools::Itertools;
 
-use crate::utils::{AdventError, AdjList, Indexable};
+use crate::{utils::{AdventError, AdjList, Indexable}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day12a.dat").expect("invalid input");
+    let input = data_str!("day01a");
     let g: AdjList<Node> = input.parse().expect("invalid input");
 
     (

@@ -1,10 +1,10 @@
-use std::{fs, str::FromStr, fmt};
+use std::{str::FromStr, fmt};
 
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day25a.dat").expect("input file does not exist");
+    let input = data_str!("day25a");
     let mut region: Region = input.parse().expect("invalid input");
 
     (

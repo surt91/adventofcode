@@ -1,12 +1,12 @@
-use std::{fs, str::FromStr, collections::HashSet};
+use std::{str::FromStr, collections::HashSet};
 
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, String) {
-    let input = fs::read_to_string("data/day13a.dat").expect("input file does not exist");
-    let (points, folds) = parse(&input).expect("invalid input");
+    let input = data_str!("day13a");
+    let (points, folds) = parse(input).expect("invalid input");
 
     (
         fold_once(&points, &folds[0]),

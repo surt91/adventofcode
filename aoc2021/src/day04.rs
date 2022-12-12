@@ -1,12 +1,12 @@
-use std::{collections::HashMap, fs, str::FromStr};
+use std::{collections::HashMap, str::FromStr};
 
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (isize, isize) {
-    let input = fs::read_to_string("data/day04a.dat").expect("input file does not exist");
-    let (order, boards) = parse(&input).expect("invalid input");
+    let input = data_str!("day04a");
+    let (order, boards) = parse(input).expect("invalid input");
 
     (
         bingo_first(&order, boards.clone()),

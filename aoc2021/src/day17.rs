@@ -1,12 +1,12 @@
-use std::{fs, str::FromStr, cmp};
+use std::{str::FromStr, cmp};
 
 use itertools::Itertools;
 use scan_fmt::scan_fmt;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (isize, usize) {
-    let line = fs::read_to_string("data/day17a.dat").expect("input file does not exist");
+    let line = data_str!("day17a");
     let target: TargetZone = line.parse().expect("invalid input");
 
     (

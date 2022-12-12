@@ -1,12 +1,10 @@
-use std::fs;
-
 use rayon::prelude::*;
 
-use crate::utils::{Map, AdventError, binary};
+use crate::{utils::{Map, AdventError, binary}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day20a.dat").expect("input file does not exist");
-    let (rules, image) = parse(&input).expect("invalid input");
+    let input = data_str!("day20a");
+    let (rules, image) = parse(input).expect("invalid input");
 
     (
         image.multi_enhance(&rules, 2).count_light(),

@@ -1,11 +1,11 @@
-use std::{fs, iter};
+use std::iter;
 
 use itertools::Itertools;
 
-use crate::utils::Map;
+use crate::{utils::Map, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day11a.dat").expect("input file does not exist");
+    let input = data_str!("day11a");
     let mut map: Map = input.parse().expect("invalid input");
 
     let num = 100;

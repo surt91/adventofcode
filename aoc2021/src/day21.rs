@@ -1,13 +1,13 @@
-use std::{fs, str::FromStr, cmp};
+use std::{str::FromStr, cmp};
 
 use itertools::{Itertools, iproduct};
 use scan_fmt::scan_fmt;
 use cached::proc_macro::cached;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day21a.dat").expect("input file does not exist");
+    let input = data_str!("day21a");
     let mut start: DiracDice = input.parse().expect("invalid input");
     let (w1, w2) = dirac_dice_wins(start.players[0] as u8, start.players[1] as u8);
 

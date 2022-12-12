@@ -9,16 +9,16 @@ fn main() {
 
     if args.len() < 2 {
         // without argument, run all
-        args = (0..=25).map(|n| format!("{}", n)).collect();
+        args = (0..=25).map(|n| format!("{n}")).collect();
     }
 
     fn show<T, U>(n: usize, (a, b): (T, U))
         where T: Display, U: Display
     {
-        let title = format!("Day {}", n).yellow();
-        println!("{}", title);
-        println!("{}", a);
-        println!("{}", b);
+        let title = format!("Day {n}").yellow();
+        println!("{title}");
+        println!("{a}");
+        println!("{b}");
         println!();
     }
 
@@ -49,8 +49,8 @@ fn main() {
             Ok(n @ 23) => show(n, day23::run()),
             Ok(n @ 24) => show(n, day24::run()),
             Ok(n @ 25) => show(n, day25::run()),
-            Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {}", n).yellow()),
-            Err(e) => println!("Invalid Argument: {}.", e),
+            Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {n}").yellow()),
+            Err(e) => println!("Invalid Argument: {e}."),
         }
     }
 }

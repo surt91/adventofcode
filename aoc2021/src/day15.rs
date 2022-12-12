@@ -1,11 +1,11 @@
-use std::{fs, collections::{HashSet, HashMap}};
+use std::{collections::{HashSet, HashMap}};
 
 use priority_queue::DoublePriorityQueue;
 
-use crate::utils::Map;
+use crate::{utils::Map, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day15a.dat").expect("input file does not exist");
+    let input = data_str!("day15a");
     let map: Map = input.parse().expect("invalid input");
 
     (

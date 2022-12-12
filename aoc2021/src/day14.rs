@@ -1,13 +1,13 @@
-use std::{fs, str::FromStr, collections::HashMap};
+use std::{str::FromStr, collections::HashMap};
 
 use itermore::IterMore;
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (isize, isize) {
-    let input = fs::read_to_string("data/day14a.dat").expect("input file does not exist");
-    let (template, rules) = parse(&input).expect("invalid input");
+    let input = data_str!("day14a");
+    let (template, rules) = parse(input).expect("invalid input");
 
     (
         calculate(&template, &rules, 10),

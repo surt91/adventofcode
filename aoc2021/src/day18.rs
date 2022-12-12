@@ -1,11 +1,11 @@
-use std::{str::FromStr, fs, ops::{Add, AddAssign}, iter::Sum, fmt::Display, cmp};
+use std::{str::FromStr, ops::{Add, AddAssign}, iter::Sum, fmt::Display, cmp};
 
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day18a.dat").expect("invalid input");
+    let input = data_str!("day18a");
     let g: Vec<SnailfishNumber> = input.trim().split('\n')
         .map(|line| line.parse())
         .collect::<Result<_, _>>()
@@ -251,7 +251,7 @@ impl Display for SnailfishNumber {
             match c {
                 Element::Open => write!(f, "[")?,
                 Element::Close => write!(f, "]")?,
-                Element::Number(x) => write!(f, "{},", x)?,
+                Element::Number(x) => write!(f, "{x},")?,
             };
         }
         Ok(())

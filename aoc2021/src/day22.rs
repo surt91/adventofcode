@@ -1,11 +1,11 @@
-use std::{fs, str::FromStr, cmp, collections::HashSet};
+use std::{str::FromStr, cmp, collections::HashSet};
 
 use scan_fmt::scan_fmt;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, isize) {
-    let input = fs::read_to_string("data/day22a.dat").expect("input file does not exist");
+    let input = data_str!("day22a");
     let cuboids: Cuboids = input.parse().expect("invalid input");
 
     (

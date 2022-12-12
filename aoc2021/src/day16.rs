@@ -1,11 +1,11 @@
-use std::{fs, str::FromStr};
+use std::{str::FromStr};
 
 use itertools::Itertools;
 
-use crate::utils::{AdventError, binary};
+use crate::{utils::{AdventError, binary}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day16a.dat").expect("input file does not exist");
+    let input = data_str!("day16a");
     let bits: Packet = input.parse().expect("invalid input");
 
     (
@@ -53,7 +53,7 @@ impl PacketParser {
     fn new(line: &str) -> Result<Self, AdventError> {
         let binary = line.trim().chars().map(|letter| {
             let num = u8::from_str_radix(&letter.to_string(), 16);
-            num.map(|n| format!("{:0>4b}", n))
+            num.map(|n| format!("{n:0>4b}"))
         }).collect::<Result<Vec<_>, _>>()?
         .iter()
         .flat_map(|s| s.chars())

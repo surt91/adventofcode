@@ -1,11 +1,9 @@
-use std::fs;
-
 use itertools::Itertools;
 
-use crate::utils::{UnionFind, Map};
+use crate::{utils::{UnionFind, Map}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day09a.dat").expect("input file does not exist");
+    let input = data_str!("day09a");
     let map: Map = input.parse().expect("invalid input");
 
     (

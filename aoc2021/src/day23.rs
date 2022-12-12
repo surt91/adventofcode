@@ -1,14 +1,14 @@
-use std::{fs, str::FromStr, fmt, cmp, collections::HashSet};
+use std::{str::FromStr, fmt, cmp, collections::HashSet};
 
 use itertools::Itertools;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day23a.dat").expect("input file does not exist");
+    let input = data_str!("day23a");
     let situation: Situation = input.parse().expect("invalid input");
 
-    let input = fs::read_to_string("data/day23b.dat").expect("input file does not exist");
+    let input = data_str!("day23b");
     let situation4: Situation = input.parse().expect("invalid input");
 
     (
@@ -145,7 +145,7 @@ impl fmt::Display for Amphipod {
             Amphipod::Desert => "D",
             Amphipod::None => ".",
         };
-        write!(f, "{}", letter)
+        write!(f, "{letter}")
     }
 }
 

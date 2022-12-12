@@ -1,14 +1,14 @@
-use std::{collections::HashSet, fs, str::FromStr, ops::{Sub, Add}};
+use std::{collections::HashSet, str::FromStr, ops::{Sub, Add}};
 
 use itertools::{Itertools, iproduct};
 use scan_fmt::scan_fmt;
 use rayon::prelude::*;
 
-use crate::utils::AdventError;
+use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = fs::read_to_string("data/day19a.dat").expect("input file does not exist");
-    let scanners = parse(&input).expect("invalid input");
+    let input = data_str!("day18a");
+    let scanners = parse(input).expect("invalid input");
     let scanners = locate_scanners(&scanners);
 
     (

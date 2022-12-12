@@ -84,7 +84,7 @@ pub fn run() -> Coord {
 
     (
         shortest_path_length(&data),
-        0
+        shortest_possible_path_length(&data)
     )
 }
 
@@ -92,6 +92,18 @@ fn shortest_path_length(map: &LetterMap) -> usize {
     let start = map.start;
     let end = map.end;
     astar(&map, start, end).len() - 1
+}
+
+fn shortest_possible_path_length(map: &LetterMap) -> usize {
+    // we should use dynamic programming and remember for each site how far it is to the end,
+    //  but this brute ansatz is fast enough for now (yay, A*)
+    let possible_starts = map.map.values.iter()
+        .enumerate()
+        .flat_map(|(n, values)| values.iter().find_position(|&&c| c == b'a').map(|(pos, _)| (pos, n)));
+    let end = map.end;
+    possible_starts.map(|start| astar(&map, start, end).len() - 1)
+        .min()
+        .unwrap()
 }
 
 #[cfg(test)]
@@ -110,5 +122,6 @@ mod tests {
 
         let data: LetterMap = input.parse().expect("invalid input");
         assert_eq!(shortest_path_length(&data), 31);
+        assert_eq!(shortest_possible_path_length(&data), 29);
     }
 }

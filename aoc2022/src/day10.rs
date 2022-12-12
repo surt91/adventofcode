@@ -1,6 +1,6 @@
-use std::str::FromStr;
+use std::{str::FromStr, iter};
 
-use aoc2021::{data_str, utils::{AdventError, split_lines}};
+use aoc2021::{data_str, utils::{AdventError, split_lines, letters}};
 
 enum Instruction {
     Addx(isize),
@@ -53,7 +53,6 @@ impl Registers {
     }
 }
 
-
 pub fn run() -> (isize, String) {
 
     let input = data_str!("day10");
@@ -62,8 +61,7 @@ pub fn run() -> (isize, String) {
 
     (
         signal_strengths(&cycles, &program),
-        // TODO: parse the output into letters
-        draw(&program)
+        letters(&program)
     )
 }
 
@@ -86,7 +84,7 @@ fn raster(trace: &[isize]) -> Vec<bool> {
         .collect()
 }
 
-fn draw(program: &[Instruction]) -> String {
+fn _draw(program: &[Instruction]) -> String {
     let trace = Registers::new().trace(program);
     raster(&trace).iter()
         .map(|&p| if p {'#'} else {'.'})
@@ -103,12 +101,38 @@ fn draw(program: &[Instruction]) -> String {
         .collect()
 }
 
+fn letters(program: &[Instruction]) -> String {
+    let width = 40;
+    let height = 6;
+    let trace = Registers::new().trace(program);
+    let image = raster(&trace);
+    let mut transposed = vec![vec![vec!['\n'; height]; 5]; 8];
+    for (n, &i) in image.iter().enumerate() {
+        let (x, y) = (n % width, n / width);
+        transposed[x/5][(x%5)][y] = if i {'#'} else {' '}
+    }
+
+    let transposed = transposed.iter().map(|letter|
+        letter.iter()
+            .take(4)
+            .flat_map(|row|
+                row[..=row.iter().rposition(|&c| c != ' ').unwrap_or(0)]
+                    .iter()
+                    .chain(iter::once(&'\n'))
+            )
+            .collect::<String>()
+    );
+
+    transposed
+        .map(|letter| letters::parse(&letter).unwrap())
+        .collect()
+}
+
 fn parse(input: &str) -> Result<Vec<Instruction>, AdventError> {
     split_lines(input).iter()
         .map(|line| line.parse())
         .collect()
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -287,6 +311,6 @@ r"##..##..##..##..##..##..##..##..##..##..
 #####.....#####.....#####.....#####.....
 ######......######......######......####
 #######.......#######.......#######.....";
-        assert_eq!(draw(&program), expected_image);
+        assert_eq!(_draw(&program), expected_image);
     }
 }

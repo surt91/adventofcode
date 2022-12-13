@@ -1,0 +1,177 @@
+use std::str::FromStr;
+
+use aoc2021::{data_str, utils::AdventError};
+use itertools::Itertools;
+
+#[derive(Clone, Debug)]
+enum Element {
+    Integer(usize),
+    List(Vec<Element>),
+}
+
+impl PartialEq for Element {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Integer(l), Self::Integer(r)) => l == r,
+            (Self::List(l), Self::List(r)) => l == r,
+            _ => false,
+        }
+    }
+}
+
+impl PartialOrd for Element {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            (Element::Integer(lhs), Element::Integer(rhs)) => lhs.partial_cmp(rhs),
+            (Element::List(_lhs), Element::Integer(_rhs)) => self.partial_cmp(&Element::List(vec![other.clone()])),
+            (Element::Integer(_lhs), Element::List(_rhs)) => Element::List(vec![self.clone()]).partial_cmp(other),
+            (Element::List(lhs), Element::List(rhs)) => {
+                if lhs == rhs {
+                    return Some(std::cmp::Ordering::Equal)
+                }
+                for (l, r) in lhs.iter().zip(rhs.iter()) {
+                    if l != r {
+                        return l.partial_cmp(r)
+                    }
+                }
+                lhs.len().partial_cmp(&rhs.len())
+            }
+        }
+    }
+}
+
+impl FromStr for Element {
+    type Err = AdventError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+
+        // we start with a list, strip the left and right bracket
+        let s = &s[1..s.len()-1];
+        let mut splitted = Vec::new();
+        let mut buffer = Vec::new();
+        let mut stack = Vec::new();
+        for c in s.chars() {
+            match c {
+                '[' => {
+                    stack.push('[');
+                    buffer.push(c);
+                },
+                ']' => {
+                    stack.pop();
+                    buffer.push(c);},
+                ',' => {
+                    if stack.is_empty() {
+                        splitted.push(buffer.iter().join(""));
+                        buffer.clear();
+                    } else {
+                        buffer.push(c);
+                    }
+                },
+                _ => buffer.push(c),
+            }
+        }
+        splitted.push(buffer.iter().join(""));
+
+        println!("{:?} -> {:?}", s, splitted);
+
+        let elements: Vec<_> = splitted.iter()
+            .map(|el| if el.starts_with('[') {
+                el.parse::<Element>()
+            } else if el.is_empty() {
+                Ok(Element::List(Vec::new()))
+            } else {
+                el.trim()
+                    .parse()
+                    .map(Element::Integer)
+                    .map_err(AdventError::Parser)
+            })
+            .collect::<Result<Vec<_>, AdventError>>()?;
+
+        Ok(
+            Element::List(elements)
+        )
+    }
+}
+
+pub fn run() -> (usize, usize) {
+
+    let input = data_str!("day13");
+    let data: Vec<(Element, Element)> = parse(input).expect("invalid input");
+
+    (
+        sum_of_right_idices(&data),
+        0
+    )
+}
+
+fn parse(data: &str) -> Result<Vec<(Element, Element)>, AdventError> {
+    data.split("\n\n")
+        .map(|block| block.trim().split('\n')
+            .map(|s| s.trim().parse().unwrap())
+            .collect_tuple()
+            .ok_or(AdventError::NotEnoughElements)
+        )
+        .collect()
+}
+
+fn sum_of_right_idices(elements: &[(Element, Element)]) -> usize {
+    elements.iter()
+        .enumerate()
+        .filter(|(_n, pair)| pair.0 < pair.1)
+        .map(|(n, _pair)| n + 1)
+        .sum()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    impl Element {
+        fn new(list: &[usize]) -> Element {
+            Element::List(list.iter().map(|&i| Element::Integer(i)).collect())
+        }
+    }
+
+    #[test]
+    fn example() {
+
+        assert!(Element::new(&[1, 1, 3, 1, 1]) < Element::new(&[1, 1, 5, 1, 1]));
+        assert!(Element::new(&[7,7,7,7]) >= Element::new(&[7,7,7]));
+        assert_eq!(Element::new(&[1, 1, 3, 1, 1]), "[1, 1, 3, 1, 1]".parse::<Element>().unwrap());
+
+        assert!("[[1],[2,3,4]]".parse::<Element>().unwrap() <= "[[1],4]".parse::<Element>().unwrap());
+        assert!(
+            "[1,[2,[3,[4,[5,6,7]]]],8,9]".parse::<Element>().unwrap()
+            >= "[1,[2,[3,[4,[5,6,0]]]],8,9]".parse::<Element>().unwrap()
+        );
+
+        let input = r"
+            [1,1,3,1,1]
+            [1,1,5,1,1]
+
+            [[1],[2,3,4]]
+            [[1],4]
+
+            [9]
+            [[8,7,6]]
+
+            [[4,4],4,4]
+            [[4,4],4,4,4]
+
+            [7,7,7,7]
+            [7,7,7]
+
+            []
+            [3]
+
+            [[[]]]
+            [[]]
+
+            [1,[2,[3,[4,[5,6,7]]]],8,9]
+            [1,[2,[3,[4,[5,6,0]]]],8,9]
+        ";
+
+        let data: Vec<(Element, Element)> = parse(input).expect("invalid input");
+        assert_eq!(sum_of_right_idices(&data), 13)
+    }
+}

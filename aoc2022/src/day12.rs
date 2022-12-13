@@ -77,7 +77,7 @@ impl FromStr for LetterMap {
     }
 }
 
-pub fn run() -> Coord {
+pub fn run() -> (usize, usize) {
 
     let input = data_str!("day12");
     let data: LetterMap = input.parse().expect("invalid input");

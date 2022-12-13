@@ -3,7 +3,7 @@ use std::str::FromStr;
 use aoc2021::{data_str, utils::AdventError};
 use itertools::Itertools;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq)]
 enum Element {
     Integer(usize),
     List(Vec<Element>),
@@ -40,6 +40,12 @@ impl PartialOrd for Element {
     }
 }
 
+impl Ord for Element {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 impl FromStr for Element {
     type Err = AdventError;
 
@@ -72,8 +78,6 @@ impl FromStr for Element {
         }
         splitted.push(buffer.iter().join(""));
 
-        println!("{:?} -> {:?}", s, splitted);
-
         let elements: Vec<_> = splitted.iter()
             .map(|el| if el.starts_with('[') {
                 el.parse::<Element>()
@@ -96,15 +100,16 @@ impl FromStr for Element {
 pub fn run() -> (usize, usize) {
 
     let input = data_str!("day13");
-    let data: Vec<(Element, Element)> = parse(input).expect("invalid input");
+    let pairs: Vec<(Element, Element)> = parse_pairs(input).expect("invalid input");
+    let singlets: Vec<Element> = parse_singlets(input).expect("invalid input");
 
     (
-        sum_of_right_idices(&data),
-        0
+        sum_of_right_idices(&pairs),
+        decoder_key(&singlets)
     )
 }
 
-fn parse(data: &str) -> Result<Vec<(Element, Element)>, AdventError> {
+fn parse_pairs(data: &str) -> Result<Vec<(Element, Element)>, AdventError> {
     data.split("\n\n")
         .map(|block| block.trim().split('\n')
             .map(|s| s.trim().parse().unwrap())
@@ -114,12 +119,30 @@ fn parse(data: &str) -> Result<Vec<(Element, Element)>, AdventError> {
         .collect()
 }
 
+fn parse_singlets(data: &str) -> Result<Vec<Element>, AdventError> {
+    data.split('\n')
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| line.trim().parse())
+        .collect()
+}
+
 fn sum_of_right_idices(elements: &[(Element, Element)]) -> usize {
     elements.iter()
         .enumerate()
         .filter(|(_n, pair)| pair.0 < pair.1)
         .map(|(n, _pair)| n + 1)
         .sum()
+}
+
+fn decoder_key(elements: &[Element]) -> usize {
+    let sorted: Vec<_> = elements.iter().sorted().collect();
+
+    let divider1: Element = "[[2]]".parse().unwrap();
+    let divider2: Element = "[[6]]".parse().unwrap();
+    let idx1 = sorted.binary_search(&&divider1).err().unwrap() + 1;
+    let idx2 = sorted.binary_search(&&divider2).err().unwrap() + 2;
+
+    idx1 * idx2
 }
 
 #[cfg(test)]
@@ -171,7 +194,10 @@ mod tests {
             [1,[2,[3,[4,[5,6,0]]]],8,9]
         ";
 
-        let data: Vec<(Element, Element)> = parse(input).expect("invalid input");
-        assert_eq!(sum_of_right_idices(&data), 13)
+        let data: Vec<(Element, Element)> = parse_pairs(input).expect("invalid input");
+        assert_eq!(sum_of_right_idices(&data), 13);
+
+        let data: Vec<Element> = parse_singlets(input).expect("invalid input");
+        assert_eq!(decoder_key(&data), 140);
     }
 }

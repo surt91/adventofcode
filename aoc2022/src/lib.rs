@@ -1,4 +1,7 @@
+#![feature(array_windows)]
 #![feature(return_position_impl_trait_in_trait)]
+#![allow(incomplete_features)]
+
 
 mod utils;
 
@@ -15,3 +18,4 @@ pub mod day10;
 pub mod day11;
 pub mod day12;
 pub mod day13;
+pub mod day14;

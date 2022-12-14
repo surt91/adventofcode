@@ -2,8 +2,8 @@ use std::ops::{Add, AddAssign, Sub, Neg};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Point {
-    x: isize,
-    y: isize,
+    pub x: isize,
+    pub y: isize,
 }
 
 impl Point {
@@ -22,6 +22,14 @@ impl Point {
             x: diff.x.signum(),
             y: diff.y.signum(),
         }
+    }
+}
+
+impl Add for &Point {
+    type Output = Point;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Point::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 

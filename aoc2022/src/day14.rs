@@ -1,4 +1,4 @@
-use std::{str::FromStr, cmp::{min, max}};
+use std::{str::FromStr, cmp::{min, max}, fmt::Debug};
 
 use aoc2021::{data_str, utils::{AdventError, split_lines}};
 use itertools::Itertools;
@@ -6,7 +6,7 @@ use rustc_hash::FxHashSet;
 
 use crate::utils::coordinate::Point;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Rocks {
     map: FxHashSet<Point>,
     source: Point,
@@ -20,7 +20,8 @@ impl Rocks {
         let down_left = Point::new(-1, 1);
         let down_right = Point::new(1, 1);
         'outer: loop {
-            if pos.y >= self.height {
+            // we can end as soon as sand is falling into the abyss or blocks the source
+            if pos.y >= self.height || self.map.contains(&self.source) {
                 return false;
             }
 
@@ -31,9 +32,24 @@ impl Rocks {
                     continue 'outer;
                 }
             }
+
             self.map.insert(pos);
             return true;
         }
+    }
+
+    fn with_floor(mut self) -> Self {
+        self.height += 2;
+
+        let left_infty = self.source.x - self.height;
+        let right_infty = self.source.x + self.height;
+
+        for x in left_infty..=right_infty {
+            let y = self.height;
+            self.map.insert(Point::new(x, y));
+        }
+
+        self
     }
 
     fn count_sand(mut self) -> usize {
@@ -96,10 +112,11 @@ pub fn run() -> (usize, usize) {
 
     let input = data_str!("day14");
     let rocks: Rocks = input.parse().expect("invalid input");
+    let rocks_with_floor = rocks.clone().with_floor();
 
     (
         rocks.count_sand(),
-        0
+        rocks_with_floor.count_sand(),
     )
 }
 
@@ -116,7 +133,10 @@ mod tests {
         ";
 
         let rocks: Rocks = input.parse().expect("invalid input");
+        let rocks_with_floor = rocks.clone().with_floor();
 
         assert_eq!(rocks.count_sand(), 24);
+
+        assert_eq!(rocks_with_floor.count_sand(), 93);
     }
 }

@@ -23,6 +23,11 @@ impl Point {
             y: diff.y.signum(),
         }
     }
+
+    pub(crate) fn distance_l1(&self, other: &Point) -> isize {
+        let diff = self - other;
+        diff.x.abs() + diff.y.abs()
+    }
 }
 
 impl Add for &Point {

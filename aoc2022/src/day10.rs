@@ -109,7 +109,7 @@ fn letters(program: &[Instruction]) -> String {
     let mut transposed = vec![vec![vec!['\n'; height]; 5]; 8];
     for (n, &i) in image.iter().enumerate() {
         let (x, y) = (n % width, n / width);
-        transposed[x/5][(x%5)][y] = if i {'#'} else {' '}
+        transposed[x/5][x%5][y] = if i {'#'} else {' '}
     }
 
     let transposed = transposed.iter().map(|letter|

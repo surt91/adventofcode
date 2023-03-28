@@ -1,9 +1,9 @@
-use std::str::FromStr;
+use std::{str::FromStr, fmt::Display, fmt::Debug};
 
 use aoc2021::{data_str, utils::AdventError};
 use itertools::Itertools;
 
-#[derive(Clone, Debug, Eq)]
+#[derive(Clone, Eq)]
 enum Element {
     Integer(usize),
     List(Vec<Element>),
@@ -43,6 +43,21 @@ impl PartialOrd for Element {
 impl Ord for Element {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap()
+    }
+}
+
+impl Debug for Element {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl Display for Element {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Element::List(x) => write!(f, "[{}]", x.iter().join(", ")),
+            Element::Integer(x) => write!(f, "{}", x)
+        }
     }
 }
 
@@ -139,6 +154,11 @@ fn decoder_key(elements: &[Element]) -> usize {
 
     let divider1: Element = "[[2]]".parse().unwrap();
     let divider2: Element = "[[6]]".parse().unwrap();
+
+    // let idx = sorted.binary_search(&&divider2).ok().unwrap();
+    // let x = divider2.partial_cmp(sorted[idx]);
+    // println!("{} -> {:?}", idx, x);
+
     let idx1 = sorted.binary_search(&&divider1).err().unwrap() + 1;
     let idx2 = sorted.binary_search(&&divider2).err().unwrap() + 2;
 

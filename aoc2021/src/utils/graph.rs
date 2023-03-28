@@ -1,5 +1,7 @@
 use std::ops::Index;
 
+use super::shortest_path::Neighborful;
+
 pub trait Indexable {
     fn idx(&self) -> usize;
 }
@@ -26,10 +28,6 @@ impl<T: Indexable> AdjList<T> {
         self.adj[t].push(s);
     }
 
-    pub fn neighbors(&self, u: usize) -> impl Iterator<Item=usize> + '_ {
-        self.adj[u].iter().cloned()
-    }
-
     pub fn size(&self) -> usize {
         self.nodes.len()
     }
@@ -48,5 +46,15 @@ impl<T: Indexable> Index<T> for AdjList<T> {
 
     fn index(&self, node: T) -> &Self::Output {
         &self.nodes[node.idx()]
+    }
+}
+
+impl<T: Indexable> Neighborful<usize> for AdjList<T> {
+    fn neighbors(&self, coordinate: usize) -> impl Iterator<Item=usize> + '_ {
+        self.adj[coordinate].iter().cloned()
+    }
+
+    fn distance(_c1: usize, _c2: usize) -> usize {
+        unimplemented!()
     }
 }

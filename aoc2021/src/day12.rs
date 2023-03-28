@@ -2,10 +2,10 @@ use std::{collections::HashMap, str::FromStr};
 
 use itertools::Itertools;
 
-use crate::{utils::{AdventError, AdjList, Indexable}, data_str};
+use crate::{utils::{AdventError, AdjList, Indexable, shortest_path::Neighborful}, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = data_str!("day01a");
+    let input = data_str!("day12a");
     let g: AdjList<Node> = input.parse().expect("invalid input");
 
     (

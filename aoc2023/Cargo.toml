@@ -1,0 +1,19 @@
+[package]
+name = "aoc2023"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc2021 = { path = "../aoc2021" }
+aoc2022 = { path = "../aoc2022" }
+
+rustc-hash = "1.1"
+colored = "2.0"
+scan_fmt = "0.2"
+
+[dev-dependencies]
+criterion = "0.4"
+
+[[bench]]
+name = "all_days"
+harness = false

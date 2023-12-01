@@ -3,8 +3,9 @@
 members = [
     "aoc2021",
     "aoc2022",
+    "aoc2023",
 ]
 
 default-members = [
-    "aoc2022",
+    "aoc2023",
 ]

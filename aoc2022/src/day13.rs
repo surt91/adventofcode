@@ -33,6 +33,7 @@ impl Ord for Element {
             (Element::Integer(_lhs), Element::List(_rhs)) => Element::List(vec![self.clone()]).cmp(other),
             (Element::List(lhs), Element::List(rhs)) => {
                 if lhs == rhs {
+                    // this is not correct
                     return std::cmp::Ordering::Equal
                 }
                 for (l, r) in lhs.iter().zip(rhs.iter()) {
@@ -155,12 +156,14 @@ fn decoder_key(elements: &[Element]) -> usize {
     let divider1: Element = "[[2]]".parse().unwrap();
     let divider2: Element = "[[6]]".parse().unwrap();
 
-    // let idx = sorted.binary_search(&&divider2).ok().unwrap();
-    // let x = divider2.partial_cmp(sorted[idx]);
-    // println!("{} -> {:?}", idx, x);
-
-    let idx1 = sorted.binary_search(&&divider1).err().unwrap() + 1;
-    let idx2 = sorted.binary_search(&&divider2).err().unwrap() + 2;
+    let idx1 = sorted.iter()
+        .enumerate()
+        .find(|x| x.1 > &&divider1)
+        .unwrap().0 + 1;
+    let idx2 = sorted.iter()
+        .enumerate()
+        .find(|x| x.1 > &&divider2)
+        .unwrap().0 + 2;
 
     idx1 * idx2
 }

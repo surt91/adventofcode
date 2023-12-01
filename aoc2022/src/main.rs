@@ -62,8 +62,7 @@ mod tests {
     test!{day10: (14560, "EKRHEPUZ")}
     test!{day11: (117624, 16792940265)}
     test!{day12: (420, 414)}
-    // day13 broke apparently at some point?!
-    // test!{day13: (6623, 23049)}
+    test!{day13: (6623, 23049)}
     test!{day14: (888, 26461)}
     test!{day15: (5142231, 0)}
 }

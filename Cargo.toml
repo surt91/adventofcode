@@ -9,3 +9,5 @@ members = [
 default-members = [
     "aoc2023",
 ]
+
+resolver = "2"

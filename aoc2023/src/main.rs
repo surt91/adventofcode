@@ -36,5 +36,5 @@ mod tests {
     use aoc2021::test;
     use crate::*;
 
-    test!{day01: (0, 0)}
+    test!{day01: (55621, 0)}
 }

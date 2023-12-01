@@ -21,28 +21,28 @@ impl PartialEq for Element {
 
 impl PartialOrd for Element {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match (self, other) {
-            (Element::Integer(lhs), Element::Integer(rhs)) => lhs.partial_cmp(rhs),
-            (Element::List(_lhs), Element::Integer(_rhs)) => self.partial_cmp(&Element::List(vec![other.clone()])),
-            (Element::Integer(_lhs), Element::List(_rhs)) => Element::List(vec![self.clone()]).partial_cmp(other),
-            (Element::List(lhs), Element::List(rhs)) => {
-                if lhs == rhs {
-                    return Some(std::cmp::Ordering::Equal)
-                }
-                for (l, r) in lhs.iter().zip(rhs.iter()) {
-                    if l != r {
-                        return l.partial_cmp(r)
-                    }
-                }
-                lhs.len().partial_cmp(&rhs.len())
-            }
-        }
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Element {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.partial_cmp(other).unwrap()
+        match (self, other) {
+            (Element::Integer(lhs), Element::Integer(rhs)) => lhs.cmp(rhs),
+            (Element::List(_lhs), Element::Integer(_rhs)) => self.cmp(&Element::List(vec![other.clone()])),
+            (Element::Integer(_lhs), Element::List(_rhs)) => Element::List(vec![self.clone()]).cmp(other),
+            (Element::List(lhs), Element::List(rhs)) => {
+                if lhs == rhs {
+                    return std::cmp::Ordering::Equal
+                }
+                for (l, r) in lhs.iter().zip(rhs.iter()) {
+                    if l != r {
+                        return l.cmp(r)
+                    }
+                }
+                lhs.len().cmp(&rhs.len())
+            }
+        }
     }
 }
 

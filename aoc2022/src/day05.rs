@@ -54,8 +54,7 @@ fn parse(input: &str) -> (Vec<Vec<char>>, Vec<Instruction>) {
     let instructions = split_lines(parts.next().unwrap());
 
     let num_stacks = crates.iter()
-        .rev()
-        .next()
+        .next_back()
         .unwrap()
         .split_whitespace()
         .count();

@@ -66,7 +66,7 @@ impl FromStr for LetterMap {
         map[start] = b'a';
         map[end] = b'z';
 
-        assert!(map.values.iter().all(|v| v.iter().all(|&x| (b'a'..=b'z').contains(&x))));
+        assert!(map.values.iter().all(|v| v.iter().all(|&x| x.is_ascii_lowercase())));
 
         Ok(
             LetterMap{

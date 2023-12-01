@@ -14,6 +14,7 @@ impl Neighborful<Coord> for &LetterMap {
 
         (&self.map).neighbors(coordinate)
             .filter(move |c| self.map[c] <= self.map[coordinate] + 1)
+            .collect_vec().into_iter()
     }
 
     fn distance(c1: Coord, c2: Coord) -> usize {

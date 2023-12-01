@@ -1,6 +1,8 @@
 use core::fmt;
 use std::{str::FromStr, iter, ops::{Index, IndexMut}};
 
+use itertools::Itertools;
+
 use super::{AdventError, shortest_path::Neighborful};
 
 pub type Coord = (usize, usize);
@@ -23,6 +25,8 @@ impl Map {
         )).chain(iter::once(
             if x == 0 || y == 0 {None} else {Some((x-1, y-1))},
         )).flatten()
+        .collect_vec()
+        .into_iter()
     }
 }
 

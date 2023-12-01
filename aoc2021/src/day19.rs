@@ -7,7 +7,7 @@ use rayon::prelude::*;
 use crate::{utils::AdventError, data_str};
 
 pub fn run() -> (usize, usize) {
-    let input = data_str!("day18a");
+    let input = data_str!("day19a");
     let scanners = parse(input).expect("invalid input");
     let scanners = locate_scanners(&scanners);
 

@@ -20,7 +20,17 @@ fn sum_of_calibration_values(values: &[(u32, u32)]) -> u32 {
 }
 
 fn parse(input: &str, spelled: bool) -> Result<Vec<(u32, u32)>, AdventError> {
-    let mut values = HashMap::new();
+    let mut values = HashMap::from([
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+        ("5", 5),
+        ("6", 6),
+        ("7", 7),
+        ("8", 8),
+        ("9", 9),
+    ]);
     if spelled {
         values.insert("one", 1);
         values.insert("two", 2);
@@ -32,15 +42,6 @@ fn parse(input: &str, spelled: bool) -> Result<Vec<(u32, u32)>, AdventError> {
         values.insert("eight", 8);
         values.insert("nine", 9);
     }
-    values.insert("1", 1);
-    values.insert("2", 2);
-    values.insert("3",3);
-    values.insert("4", 4);
-    values.insert("5", 5);
-    values.insert("6", 6);
-    values.insert("7", 7);
-    values.insert("8", 8);
-    values.insert("9", 9);
 
     let digits: Vec<&str> = values.keys().cloned().collect();
 

@@ -12,6 +12,12 @@ struct Cubes {
 
 const LIMIT: Cubes = Cubes {red: 12, green: 13, blue: 14};
 
+impl Cubes {
+    fn power(&self) -> u32 {
+        self.red * self.green * self.blue
+    }
+}
+
 impl FromStr for Cubes {
     type Err = AdventError;
 
@@ -49,7 +55,7 @@ pub fn run() -> (u32, u32) {
 
     (
         sum_of_valid_ids(&data, LIMIT),
-        0,
+        power_sum_of_minimum_cube_set(&data),
     )
 }
 
@@ -78,6 +84,24 @@ fn sum_of_valid_ids(results: &HashMap<u32, Vec<Cubes>>, limit: Cubes) -> u32 {
         .sum()
 }
 
+fn minimum_cube_set(game: &[Cubes]) -> Cubes {
+    let red = game.iter().map(|cubes| cubes.red).max().unwrap_or(0);
+    let green = game.iter().map(|cubes| cubes.green).max().unwrap_or(0);
+    let blue = game.iter().map(|cubes| cubes.blue).max().unwrap_or(0);
+
+    Cubes {
+        red,
+        green,
+        blue,
+    }
+}
+
+fn power_sum_of_minimum_cube_set(results: &HashMap<u32, Vec<Cubes>>) -> u32 {
+    results.iter().map(|(_id, game)| minimum_cube_set(game))
+        .map(|cube_set| cube_set.power())
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,6 +119,6 @@ mod tests {
         let data = parse(input).expect("invalid input");
 
         assert_eq!(sum_of_valid_ids(&data, LIMIT), 8);
-
+        assert_eq!(power_sum_of_minimum_cube_set(&data), 2286);
     }
 }

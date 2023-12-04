@@ -38,5 +38,5 @@ mod tests {
     use crate::*;
 
     test!{day01: (55621, 53592)}
-    test!{day02: (2149, 0)}
+    test!{day02: (2149, 71274)}
 }

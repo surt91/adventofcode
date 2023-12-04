@@ -42,7 +42,7 @@ pub fn run() -> (u32, u32) {
 
     (
         score(&cards),
-        0,
+        num_scratchcards(&cards),
     )
 }
 
@@ -65,6 +65,21 @@ fn score(cards: &[Card]) -> u32 {
         .sum()
 }
 
+fn num_scratchcards(cards: &[Card]) -> u32 {
+    let mut num_cards = vec![1; cards.len()];
+    for (n, card) in cards.iter().enumerate() {
+        let count = card.winning.intersection(&card.numbers).count();
+        for i in 1..=count {
+            if n+i >= cards.len() {
+                break;
+            }
+            num_cards[n+i] += num_cards[n];
+        }
+    }
+
+    num_cards.iter().sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,5 +98,6 @@ mod tests {
         let cards: Vec<Card> = parse(input).expect("invalid input");
 
         assert_eq!(score(&cards), 13);
+        assert_eq!(num_scratchcards(&cards), 30);
     }
 }

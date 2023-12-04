@@ -3,7 +3,7 @@ use std::{collections::HashSet, str::FromStr};
 use aoc2021::{data_str, utils::{Map, AdventError}};
 use itertools::Itertools;
 
-struct TreeMap(Map);
+struct TreeMap(Map<u8>);
 
 impl TreeMap {
 
@@ -101,7 +101,7 @@ impl FromStr for TreeMap {
     type Err = AdventError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let map: Map = s.parse()?;
+        let map: Map<u8> = s.parse()?;
         Ok(TreeMap(map))
     }
 }

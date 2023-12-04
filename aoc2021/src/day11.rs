@@ -6,7 +6,7 @@ use crate::{utils::Map, data_str};
 
 pub fn run() -> (usize, usize) {
     let input = data_str!("day11a");
-    let mut map: Map = input.parse().expect("invalid input");
+    let mut map: Map<u8> = input.parse().expect("invalid input");
 
     let num = 100;
 
@@ -16,7 +16,7 @@ pub fn run() -> (usize, usize) {
     )
 }
 
-impl Map {
+impl Map<u8> {
     fn count_flashes(&mut self, num: usize) -> usize {
         iter::repeat_with(|| self.step()).take(num).sum()
     }
@@ -74,7 +74,7 @@ mod tests {
             5283751526
         ";
 
-        let mut map: Map = input.parse().expect("invalid input");
+        let mut map: Map<u8> = input.parse().expect("invalid input");
         let num = 100;
 
         assert_eq!(map.count_flashes(num), 1656);

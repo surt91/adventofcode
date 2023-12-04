@@ -4,7 +4,7 @@ use aoc2021::{data_str, utils::{AdventError, Map, Coord, shortest_path::{Neighbo
 use itertools::Itertools;
 
 struct LetterMap{
-    map: Map,
+    map: Map<u8>,
     start: Coord,
     end: Coord,
 }
@@ -18,7 +18,7 @@ impl Neighborful<Coord> for &LetterMap {
     }
 
     fn distance(c1: Coord, c2: Coord) -> usize {
-        <&Map>::distance(c1, c2)
+        <&Map<u8>>::distance(c1, c2)
     }
 }
 

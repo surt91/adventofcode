@@ -12,7 +12,7 @@ pub fn run() -> (usize, usize) {
     )
 }
 
-impl Map {
+impl Map<u8> {
     fn get(&self, x: isize, y: isize) -> Option<u8> {
         if x < 0 || x >= self.width as isize || y < 0 || y >= self.height as isize {
             None
@@ -34,7 +34,7 @@ impl Map {
         binary::to_usize(&out)
     }
 
-    fn enhance(&self, rules: &[u8], default: u8) -> Map {
+    fn enhance(&self, rules: &[u8], default: u8) -> Map<u8> {
         let width = self.width+2;
         let height = self.height+2;
 
@@ -52,7 +52,7 @@ impl Map {
         }
     }
 
-    fn multi_enhance(&self, rules: &[u8], n: usize) -> Map {
+    fn multi_enhance(&self, rules: &[u8], n: usize) -> Map<u8> {
         let default = 0;
         let mut image = self.enhance(rules, default);
         for _ in 0..n-1 {
@@ -77,7 +77,7 @@ impl Map {
     }
 }
 
-fn parse(input: &str) -> Result<(Vec<u8>, Map), AdventError> {
+fn parse(input: &str) -> Result<(Vec<u8>, Map<u8>), AdventError> {
     let mut it = input.split("\n\n");
     let rules = it.next()
         .ok_or(AdventError::NotEnoughElements)?
@@ -86,7 +86,7 @@ fn parse(input: &str) -> Result<(Vec<u8>, Map), AdventError> {
         .map(|p| if p == '#' {1} else {0})
         .collect();
 
-    let map: Map = it.next()
+    let map: Map<u8> = it.next()
         .ok_or(AdventError::NotEnoughElements)?
         .trim()
         .replace('#', "1")

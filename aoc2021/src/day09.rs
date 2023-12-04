@@ -4,7 +4,7 @@ use crate::{utils::{UnionFind, Map, shortest_path::Neighborful}, data_str};
 
 pub fn run() -> (usize, usize) {
     let input = data_str!("day09a");
-    let map: Map = input.parse().expect("invalid input");
+    let map: Map<u8> = input.parse().expect("invalid input");
 
     (
         map.risk(),
@@ -19,7 +19,7 @@ enum NodeState {
     Visited
 }
 
-impl Map {
+impl Map<u8> {
     fn risk(&self) -> usize {
         self.find_lowpoints().iter().map(|&p| self[p] as usize + 1).sum()
     }
@@ -137,7 +137,7 @@ mod tests {
             9899965678
         ";
 
-        let map: Map = input.parse().expect("invalid input");
+        let map: Map<u8> = input.parse().expect("invalid input");
 
         assert_eq!(map.risk(), 15);
         assert_eq!(map.basins(), 1134);

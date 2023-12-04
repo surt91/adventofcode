@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{str::FromStr, iter, ops::{Index, IndexMut}};
+use std::{str::FromStr, iter, ops::{Index, IndexMut}, fmt::Display};
 
 use itertools::Itertools;
 
@@ -7,13 +7,13 @@ use super::{AdventError, shortest_path::Neighborful};
 
 pub type Coord = (usize, usize);
 
-pub struct Map {
+pub struct Map<T> {
     pub width: usize,
     pub height: usize,
-    pub values: Vec<Vec<u8>>
+    pub values: Vec<Vec<T>>
 }
 
-impl Map {
+impl<T> Map<T> {
     pub fn diagonal_neighbors(&self, coordinate: Coord) -> impl Iterator<Item=Coord> {
         let (x, y) = coordinate;
         self.neighbors(coordinate).map(Some).chain(iter::once(
@@ -30,8 +30,8 @@ impl Map {
     }
 }
 
-impl Index<&Coord> for Map {
-    type Output = u8;
+impl<T> Index<&Coord> for Map<T> {
+    type Output = T;
 
     fn index(&self, coordinate: &Coord) -> &Self::Output {
         let (x, y) = coordinate;
@@ -39,8 +39,8 @@ impl Index<&Coord> for Map {
     }
 }
 
-impl Index<Coord> for &Map {
-    type Output = u8;
+impl<T> Index<Coord> for &Map<T> {
+    type Output = T;
 
     fn index(&self, coordinate: Coord) -> &Self::Output {
         let (x, y) = coordinate;
@@ -48,8 +48,8 @@ impl Index<Coord> for &Map {
     }
 }
 
-impl Index<Coord> for Map {
-    type Output = u8;
+impl<T> Index<Coord> for Map<T> {
+    type Output = T;
 
     fn index(&self, coordinate: Coord) -> &Self::Output {
         let (x, y) = coordinate;
@@ -57,14 +57,14 @@ impl Index<Coord> for Map {
     }
 }
 
-impl IndexMut<Coord> for Map {
+impl<T> IndexMut<Coord> for Map<T> {
     fn index_mut(&mut self, coordinate: Coord) -> &mut Self::Output {
         let (x, y) = coordinate;
         &mut self.values[y][x]
     }
 }
 
-impl fmt::Display for Map
+impl<T: Display> fmt::Display for Map<T>
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for y in 0..self.height {
@@ -77,7 +77,7 @@ impl fmt::Display for Map
     }
 }
 
-impl FromStr for Map
+impl FromStr for Map<u8>
 {
     type Err = AdventError;
 
@@ -110,7 +110,32 @@ impl FromStr for Map
     }
 }
 
-impl Neighborful<Coord> for &Map {
+
+impl FromStr for Map<char>
+{
+    type Err = AdventError;
+
+    fn from_str(input: &str) -> Result<Self, AdventError> {
+        let values: Vec<Vec<char>> = input.trim().split('\n')
+            .map(|line| line.trim().chars().collect())
+            .collect();
+
+        let width = values[0].len();
+        let height = values.len();
+
+        assert!(values.iter().all(|l| l.len() == width));
+
+        Ok(
+            Map {
+                width,
+                height,
+                values
+            }
+        )
+    }
+}
+
+impl<T> Neighborful<Coord> for &Map<T> {
     fn neighbors(&self, coordinate: Coord) -> impl Iterator<Item=Coord> {
         let (x, y) = coordinate;
         iter::once(

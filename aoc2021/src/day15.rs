@@ -2,7 +2,7 @@ use crate::{utils::{Map, shortest_path::astar}, data_str};
 
 pub fn run() -> (usize, usize) {
     let input = data_str!("day15a");
-    let map: Map = input.parse().expect("invalid input");
+    let map: Map<u8> = input.parse().expect("invalid input");
 
     (
         map.lowest_risk(),
@@ -10,7 +10,7 @@ pub fn run() -> (usize, usize) {
     )
 }
 
-impl Map {
+impl Map<u8> {
     fn lowest_risk(&self) -> usize {
         let start = (0, 0);
         let end = (self.width-1, self.height-1);
@@ -20,7 +20,7 @@ impl Map {
         shortest.iter().rev().skip(1).map(|p| self[*p] as usize).sum()
     }
 
-    fn expand(&self) -> Map {
+    fn expand(&self) -> Map<u8> {
         let width = 5*self.width;
         let height = 5*self.height;
 
@@ -70,7 +70,7 @@ mod tests {
             2311944581
         ";
 
-        let map: Map = input.parse().expect("invalid input");
+        let map: Map<u8> = input.parse().expect("invalid input");
 
         assert_eq!(map.lowest_risk(), 40);
         assert_eq!(map.expand().lowest_risk(), 315);

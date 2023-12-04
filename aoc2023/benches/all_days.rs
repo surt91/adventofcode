@@ -15,6 +15,7 @@ macro_rules! day_benches {
 day_benches!{
     day01,
     day02,
+    day03,
 }
 
 criterion_main!(benches);

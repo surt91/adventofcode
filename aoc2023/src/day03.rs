@@ -1,7 +1,8 @@
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 use aoc2021::data_str;
-use aoc2021::utils::{AdventError, Map};
+use aoc2021::utils::{AdventError, Map, Coord};
 
 pub fn run() -> (u32, u32) {
 
@@ -10,7 +11,7 @@ pub fn run() -> (u32, u32) {
 
     (
         sum_of_numbers_with_neighbors(&map),
-        0,
+        sum_of_gear_ratios(&map),
     )
 }
 
@@ -62,10 +63,64 @@ impl WideNumberMap {
 
         numbers_with_neighbors
     }
+
+    fn numbers_near_gears(&self) -> HashMap<Coord, Vec<u32>> {
+        let mut digit_string: Vec<char> = Vec::new();
+        let mut gear_neighbor_coords = HashSet::new();
+        let mut numbers_with_neighbors: HashMap<Coord, Vec<u32>> = HashMap::new();
+
+        for y in 0..self.map.height {
+            for x in 0..self.map.width {
+                if self.map.values[y][x].is_ascii_digit() {
+                    digit_string.push(self.map.values[y][x]);
+
+                    gear_neighbor_coords.extend(
+                        self.map.diagonal_neighbors((x, y))
+                            .map(|(x, y)| ((x, y), self.map.values[y][x]))
+                            .filter(|(_coord, c)| *c == '*')
+                            .map(|(coord, _c)| coord)
+                    );
+                } else {
+                    // in this case the number is complete
+                    if !digit_string.is_empty() && !gear_neighbor_coords.is_empty() {
+                        let number: u32 = digit_string.iter().collect::<String>().parse().unwrap();
+                        for coord in &gear_neighbor_coords {
+                            numbers_with_neighbors.entry(*coord)
+                                .or_default()
+                                .push(number);
+                        }
+                    }
+                    digit_string.clear();
+                    gear_neighbor_coords.clear();
+                }
+            }
+            // in this case the number is complete
+            if !digit_string.is_empty() && !gear_neighbor_coords.is_empty() {
+                let number: u32 = digit_string.iter().collect::<String>().parse().unwrap();
+                for coord in &gear_neighbor_coords {
+                    numbers_with_neighbors.entry(*coord)
+                        .or_default()
+                        .push(number);
+                }
+            }
+            digit_string.clear();
+            gear_neighbor_coords.clear();
+        }
+
+        numbers_with_neighbors
+    }
 }
 
 fn sum_of_numbers_with_neighbors(map: &WideNumberMap) -> u32 {
     map.numbers_with_neighbor_symbols().iter().sum()
+}
+
+fn sum_of_gear_ratios(map: &WideNumberMap) -> u32 {
+    map.numbers_near_gears()
+        .iter()
+        .filter(|(_coord, vec)| vec.len() == 2)
+        .map(|(_coord, vec)| vec.iter().product::<u32>())
+        .sum()
 }
 
 #[cfg(test)]
@@ -85,10 +140,11 @@ mod tests {
             ......755.
             ...$.*....
             .664.598..
-        ";
+            ";
 
-        let map: WideNumberMap = input.parse().expect("invalid input");
+            let map: WideNumberMap = input.parse().expect("invalid input");
 
         assert_eq!(sum_of_numbers_with_neighbors(&map), 4361);
+        assert_eq!(sum_of_gear_ratios(&map), 467835);
     }
 }

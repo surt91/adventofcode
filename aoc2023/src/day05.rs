@@ -5,12 +5,14 @@ use scan_fmt::scan_fmt;
 use aoc2021::data_str;
 use aoc2021::utils::AdventError;
 
+#[derive(Clone)]
 struct Line {
     dest_start: u64,
     src_start: u64,
     length: u64,
 }
 
+#[derive(Clone)]
 struct Map {
     lines: Vec<Line>,
 }
@@ -28,6 +30,7 @@ impl Map {
     }
 }
 
+#[derive(Clone)]
 struct Maps {
     seeds: Vec<u64>,
     maps: Vec<Map>,
@@ -80,16 +83,25 @@ impl Maps {
         }
         src
     }
+
+    fn expand_seeds_to_ranges(&mut self) {
+        // brute force -- but under two minutes
+        self.seeds = self.seeds.chunks_exact(2)
+            .flat_map(|pair| pair[0]..pair[0]+pair[1])
+            .collect();
+    }
 }
 
 pub fn run() -> (u64, u64) {
 
     let input = data_str!("day05");
     let maps: Maps = input.parse().expect("invalid input");
+    let mut maps_extended = maps.clone();
+    maps_extended.expand_seeds_to_ranges();
 
     (
         lowest_location_number(&maps),
-        0,
+        lowest_location_number(&maps_extended),
     )
 }
 
@@ -140,7 +152,10 @@ mod tests {
         ";
 
         let maps: Maps = input.parse().expect("invalid input");
+        let mut maps_extended = maps.clone();
+        maps_extended.expand_seeds_to_ranges();
 
         assert_eq!(lowest_location_number(&maps), 35);
+        assert_eq!(lowest_location_number(&maps_extended), 46);
     }
 }

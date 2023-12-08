@@ -7,6 +7,7 @@ edition = "2021"
 aoc2021 = { path = "../aoc2021" }
 aoc2022 = { path = "../aoc2022" }
 
+counter = "0.5"
 rustc-hash = "1.1"
 colored = "2.0"
 scan_fmt = "0.2"

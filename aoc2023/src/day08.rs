@@ -1,9 +1,12 @@
 use std::collections::HashMap;
 
+use counter::Counter;
 use scan_fmt::scan_fmt;
 
 use aoc2021::data_str;
 use aoc2021::utils::AdventError;
+
+use crate::utils::factorize::factorize;
 
 
 pub fn run() -> (usize, usize) {
@@ -120,17 +123,20 @@ fn count_ghost_steps(map: HashMap<String, Node>, instructions: Vec<Instruction>)
 }
 
 fn least_common_multiple(numbers: Vec<usize>) -> usize {
-    let mut multiples = numbers.clone();
-    loop {
-        let idx = multiples.iter().enumerate().map(|(x, y)| (y, x)).min().unwrap().1;
-        multiples[idx] += numbers[idx];
-
-        if multiples.iter().all(|&x| x == multiples[0]) {
-            break
+    let mut prime_factors: Counter<usize> = Counter::new();
+    for num in numbers {
+        let factors = factorize(num);
+        let factors: Counter<usize> = factors.into_iter().collect();
+        for (prime, &multiplicity) in factors.iter() {
+            if prime_factors[prime] < multiplicity {
+                prime_factors[prime] = multiplicity;
+            }
         }
     }
 
-    multiples[0]
+    prime_factors.iter()
+        .map(|(prime, multiplicity)| prime * multiplicity)
+        .product()
 }
 
 #[cfg(test)]

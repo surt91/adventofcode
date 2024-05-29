@@ -34,18 +34,7 @@ fn extrapolated_sum_left(sequences: &[Vec<i64>]) -> i64 {
 }
 
 fn extrapolate(sequence: &[i64]) -> i64 {
-    let mut differences: Vec<Vec<i64>> = vec![sequence.iter().cloned().collect()];
-
-    loop {
-        let d = diff(differences.last().unwrap());
-        if d.len() == 0 {
-            panic!()
-        }
-        if d.iter().all(|&i| i == 0) {
-            break;
-        }
-        differences.push(d);
-    }
+    let differences = differences(&sequence);
 
     let mut unkowns: Vec<i64> = vec![0];
     for diffs in differences.iter().rev() {
@@ -57,15 +46,20 @@ fn extrapolate(sequence: &[i64]) -> i64 {
     *unkowns.last().unwrap()
 }
 
-fn diff(seq: &[i64]) -> Vec<i64> {
-    seq.iter()
-        .skip(1)
-        .zip(seq)
-        .map(|(i, j)| i - j)
-        .collect()
+fn extrapolate_left(sequence: &[i64]) -> i64 {
+    let differences = differences(&sequence);
+
+    let mut unkowns: Vec<i64> = vec![0];
+    for diffs in differences.iter().rev() {
+        let d = unkowns.last().unwrap();
+        let u = diffs.first().unwrap() - d;
+        unkowns.push(u);
+    }
+
+    *unkowns.last().unwrap()
 }
 
-fn extrapolate_left(sequence: &[i64]) -> i64 {
+fn differences(sequence: &[i64]) -> Vec<Vec<i64>> {
     let mut differences: Vec<Vec<i64>> = vec![sequence.iter().cloned().collect()];
 
     loop {
@@ -79,14 +73,15 @@ fn extrapolate_left(sequence: &[i64]) -> i64 {
         differences.push(d);
     }
 
-    let mut unkowns: Vec<i64> = vec![0];
-    for diffs in differences.iter().rev() {
-        let d = unkowns.last().unwrap();
-        let u = diffs.first().unwrap() - d;
-        unkowns.push(u);
-    }
+    differences
+}
 
-    *unkowns.last().unwrap()
+fn diff(seq: &[i64]) -> Vec<i64> {
+    seq.iter()
+        .skip(1)
+        .zip(seq)
+        .map(|(i, j)| i - j)
+        .collect()
 }
 
 #[cfg(test)]

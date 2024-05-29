@@ -13,7 +13,7 @@ pub struct Map<T> {
     pub values: Vec<Vec<T>>
 }
 
-impl<T> Map<T> {
+impl<T: std::cmp::PartialEq> Map<T> {
     pub fn diagonal_neighbors(&self, coordinate: Coord) -> impl Iterator<Item=Coord> {
         let (x, y) = coordinate;
         self.neighbors(coordinate).map(Some).chain(iter::once(
@@ -27,6 +27,17 @@ impl<T> Map<T> {
         )).flatten()
         .collect_vec()
         .into_iter()
+    }
+
+    pub fn find_one(&self, item: T) -> Option<Coord> {
+        for i in 0..self.width {
+            for j in 0..self.height {
+                if self[(i, j)] == item {
+                    return Some((i, j));
+                }
+            }
+        }
+        None
     }
 }
 

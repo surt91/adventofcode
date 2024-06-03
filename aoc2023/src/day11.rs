@@ -13,12 +13,12 @@ pub fn run() -> (usize, usize) {
     let map: GalaxyMap = input.parse().expect("invalid input");
 
     (
-        distances(map),
-        0,
+        expanded_distance_sum(map.clone(), 2),
+        expanded_distance_sum(map, 1000000),
     )
 }
 
-
+#[derive(Clone)]
 struct GalaxyMap {
     map: Map<char>,
 }
@@ -38,7 +38,7 @@ impl GalaxyMap {
         self.map.find_all('#')
     }
 
-    fn expand(&mut self) -> Vec<Coord> {
+    fn expand(&mut self, factor: usize) -> Vec<Coord> {
         let galaxies = self.find_galaxies();
         let rows_with_galaxies: HashSet<usize> = galaxies.iter().map(|&(_x, y)| y).collect();
         let cols_with_galaxies: HashSet<usize> = galaxies.iter().map(|&(x, _y)| x).collect();
@@ -51,12 +51,12 @@ impl GalaxyMap {
         for c in &mut expanded_coords {
             for &&row in rows_without_galaxies.iter().sorted().rev() {
                 if row < c.1 {
-                    c.1 += 1
+                    c.1 += factor - 1
                 }
             }
             for &&col in cols_without_galaxies.iter().sorted().rev() {
                 if col < c.0 {
-                    c.0 += 1
+                    c.0 += factor - 1
                 }
             }
         }
@@ -69,8 +69,8 @@ fn distance(c1: &Coord, c2: &Coord) -> usize {
     ((c1.0 as isize - c2.0 as isize).abs() + (c1.1 as isize - c2.1 as isize).abs()) as usize
 }
 
-fn distances(mut map: GalaxyMap) -> usize {
-    map.expand()
+fn expanded_distance_sum(mut map: GalaxyMap, expansion: usize) -> usize {
+    map.expand(expansion)
         .iter()
         .combinations(2)
         .map(|i| distance(i[0], i[1]))
@@ -96,6 +96,8 @@ mod tests {
             #...#.....
         ";
         let map: GalaxyMap = input.parse().expect("invalid input");
-        assert_eq!(distances(map), 374);
+        assert_eq!(expanded_distance_sum(map.clone(), 2), 374);
+        assert_eq!(expanded_distance_sum(map.clone(), 10), 1030);
+        assert_eq!(expanded_distance_sum(map, 100), 8410);
     }
 }

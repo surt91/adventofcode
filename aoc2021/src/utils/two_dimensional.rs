@@ -7,6 +7,7 @@ use super::{AdventError, shortest_path::Neighborful};
 
 pub type Coord = (usize, usize);
 
+#[derive(Clone)]
 pub struct Map<T> {
     pub width: usize,
     pub height: usize,

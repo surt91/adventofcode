@@ -8,7 +8,7 @@
 /// assert_eq!(vec![7, 191], factorize(1337));
 /// ```
 pub fn factorize(mut number: usize) -> Vec<usize> {
-    let primes = super::erathostenes::sieve_of_eratosthenes((number as f64).sqrt() as usize + 1);
+    let primes = super::eratosthenes::sieve_of_eratosthenes((number as f64).sqrt() as usize + 1);
     let mut ret = Vec::new();
 
     'outer: while number > 1 {

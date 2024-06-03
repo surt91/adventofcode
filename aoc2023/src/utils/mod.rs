@@ -1,2 +1,2 @@
-pub mod erathostenes;
+pub mod eratosthenes;
 pub mod factorize;

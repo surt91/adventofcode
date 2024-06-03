@@ -70,6 +70,7 @@ dependencies = [
  "colored",
  "counter",
  "criterion",
+ "itertools",
  "rustc-hash",
  "scan_fmt",
 ]

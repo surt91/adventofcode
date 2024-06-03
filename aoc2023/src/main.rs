@@ -34,6 +34,7 @@ fn main() {
             Ok(n @ 8) => show(n, day08::run()),
             Ok(n @ 9) => show(n, day09::run()),
             Ok(n @ 10) => show(n, day10::run()),
+            Ok(n @ 11) => show(n, day11::run()),
             Ok(n) => println!("{}\nIs not solved yet!\n", format!("Day {n}").yellow()),
             Err(e) => println!("Invalid Argument: {e}."),
         }
@@ -55,4 +56,5 @@ mod tests {
     test!{day08: (19667, 19185263738117)}
     test!{day09: (1757008019, 995)}
     test!{day10: (6773, 493)}
+    test!{day11: (9521550, 0)}
 }

@@ -39,6 +39,18 @@ impl<T: std::cmp::PartialEq> Map<T> {
         }
         None
     }
+
+    pub fn find_all(&self, item: T) -> Vec<Coord> {
+        let mut out = Vec::new();
+        for i in 0..self.width {
+            for j in 0..self.height {
+                if self[(i, j)] == item {
+                    out.push((i, j));
+                }
+            }
+        }
+        out
+    }
 }
 
 impl<T> Index<&Coord> for Map<T> {

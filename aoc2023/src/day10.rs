@@ -118,7 +118,7 @@ impl PipeMap {
         giant_loop
     }
 
-    fn value_of_s(&self, giant_loop: &Vec<Coord>) -> char {
+    fn value_of_s(&self) -> char {
         let s = self.find_start();
         let mut neighbors = self.neighbors(s);
         let before = neighbors.next().expect("invalid giant loop");
@@ -188,7 +188,7 @@ fn enclosed(map: &PipeMap) -> usize {
             }
             let mut crossings = 0;
             let mut entry: Option<Coord> = None;
-            let mut last: Option<Coord> = None;
+            let mut last: Option<Coord>;
             for ix in x..map.map.width {
                 if giant_loop_set.contains(&(ix, y)) {
                     if entry.is_none() {
@@ -204,10 +204,10 @@ fn enclosed(map: &PipeMap) -> usize {
                     let mut entry_value: char = map.map[entry.unwrap()];
                     let mut last_value: char = map.map[last.unwrap()];
                     if entry_value == 'S' {
-                        entry_value = map.value_of_s(&giant_loop);
+                        entry_value = map.value_of_s();
                     }
                     if last_value == 'S' {
-                        last_value = map.value_of_s(&giant_loop);
+                        last_value = map.value_of_s();
                     }
 
 
@@ -216,7 +216,6 @@ fn enclosed(map: &PipeMap) -> usize {
                     } else if last_value == '|' {
                         crossings += 1;
                         entry = None;
-                        last = None;
                         continue;
                     } else if entry != last {
                         if (NORTH.contains(&entry_value) && NORTH.contains(&last_value))

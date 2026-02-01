@@ -1,6 +1,3 @@
-#![feature(array_windows)]
-
-
 mod utils;
 
 pub mod day01;
